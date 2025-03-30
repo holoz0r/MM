@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Your Budget Planner</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <header class="header-row">
+        <h1>Your Budget Planner</h1>
+        <div class="header-buttons">
+            <input type="file" id="file-input" style="display: none;" accept=".json">
+            <label for="file-input" id="file-input-label" aria-label="Load Budget Data"><span>Load</span></label>
+            <button id="save-button" aria-label="Save Budget Data">Save</button>
+        </div>
+        <div class="theme-switch-container">
+            <label for="theme-switch">Lights Out:</label>
+            <label class="switch">
+                <input type="checkbox" id="theme-switch">
+                <span class="slider round"></span>
+            </label>
+        </div>
+    </header>
+
+
+    <div class="form-tabs">
+        <button class="form-tab-button active" data-form="income-form">Add Income</button>
+        <button class="form-tab-button" data-form="expense-form">Add Expenses</button>
+        <button class="form-tab-button" data-form="account-forms">Add Accounts</button>
+    </div>
+
+    <form id="income-form" class="form-pane active">
+        <h2>Income Form</h2>
+        <label for="income-source">Source:</label>
+        <input type="text" id="income-source" name="income-source" required>
+
+        <label for="income-amount">Amount:</label>
+        <input type="number" id="income-amount" name="income-amount" required step="any">
+
+        <label for="income-frequency">Frequency:</label>
+        <select id="income-frequency" name="income-frequency">
+            <option value="weekly">Weekly</option>
+            <option value="fortnightly">Fortnightly</option>
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="yearly">Yearly</option>
+        </select>
+
+        <button type="submit">Add Income</button>
+    </form>
+
+    <form id="expense-form" class="form-pane">
+        <h2>Expense Form</h2>
+        <label for="expense-name">Name:</label>
+        <input type="text" id="expense-name" name="expense-name" required>
+
+        <label for="expense-category">Category:</label>
+        <input type="text" id="expense-category" name="expense-category" required>
+
+        <label for="expense-amount">Amount:</label>
+        <input type="number" id="expense-amount" name="expense-amount" required step="any">
+
+        <label for="expense-frequency">Frequency:</label>
+        <select id="expense-frequency" name="expense-frequency">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="fortnightly">Fortnightly</option>
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="yearly">Yearly</option>
+        </select>
+
+        <button type="submit">Add Expense</button>
+    </form>
+
+    <div id="account-forms" class="form-pane">
+        <h2>Account Forms</h2>
+        <label for="account-type-selector">Account Type:</label>
+        <select id="account-type-selector">
+            <option value="everyday">Everyday</option>
+            <option value="savings">Savings</option>
+            <option value="offset">Offset</option>
+            <option value="credit">Credit</option>
+            <option value="mortgage">Mortgage</option>
+        </select>
+
+        <form id="everyday-account-form" class="account-form" style="display: block;">
+            <label for="everyday-name">Name:</label>
+            <input type="text" id="everyday-name" name="everyday-name" required>
+
+            <label for="everyday-bank">Bank:</label>
+            <input type="text" id="everyday-bank" name="everyday-bank" required>
+
+            <label for="everyday-balance">Balance:</label>
+            <input type="number" id="everyday-balance" name="everyday-balance" required step="any">
+
+            <label for="everyday-interest">Interest Rate:</label>
+            <input type="number" id="everyday-interest" name="everyday-interest" step="any">
+
+            <button type="submit">Add Everyday Account</button>
+        </form>
+
+        <form id="savings-account-form" class="account-form" style="display: none;">
+            <label for="savings-name">Name:</label>
+            <input type="text" id="savings-name" name="savings-name" required>
+
+            <label for="savings-bank">Bank:</label>
+            <input type="text" id="savings-bank" name="savings-bank" required>
+
+            <label for="savings-balance">Balance:</label>
+            <input type="number" id="savings-balance" name="savings-balance" required step="any">
+
+            <label for="savings-interest">Interest Rate:</label>
+            <input type="number" id="savings-interest" name="savings-interest" step="any">
+
+            <button type="submit">Add Savings Account</button>
+        </form>
+
+        <form id="offset-account-form" class="account-form" style="display: none;">
+            <label for="offset-name">Name:</label>
+            <input type="text" id="offset-name" name="offset-name" required>
+
+            <label for="offset-bank">Bank:</label>
+            <input type="text" id="offset-bank" name="offset-bank" required>
+
+            <label for="offset-balance">Balance:</label>
+            <input type="number" id="offset-balance" name="offset-balance" required step="any">
+
+            <button type="submit">Add Offset Account</button>
+        </form>
+
+        <form id="credit-account-form" class="account-form" style="display: none;">
+            <label for="credit-name">Name:</label>
+            <input type="text" id="credit-name" name="credit-name" required>
+
+            <label for="credit-bank">Bank:</label>
+            <input type="text" id="credit-bank" name="credit-bank" required>
+
+            <label for="credit-available">Available:</label>
+            <input type="number" id="credit-available" name="credit-available" required step="any">
+
+            <label for="credit-limit">Limit:</label>
+            <input type="number" id="credit-limit" name="credit-limit" required step="any">
+
+            <label for="credit-interest">Interest Rate:</label>
+            <input type="number" id="credit-interest" name="credit-interest" step="any">
+
+            <button type="submit">Add Credit Account</button>
+        </form>
+
+        <form id="mortgage-account-form" class="account-form" style="display: none;">
+            <label for="mortgage-name">Name:</label>
+            <input type="text" id="mortgage-name" name="mortgage-name" required>
+
+            <label for="mortgage-bank">Bank:</label>
+            <input type="text" id="mortgage-bank" name="mortgage-bank" required>
+
+            <label for="mortgage-owing">Owing:</label>
+            <input type="number" id="mortgage-owing" name="mortgage-owing" required step="any">
+
+            <label for="mortgage-interest">Interest Rate:</label>
+            <input type="number" id="mortgage-interest" name="mortgage-interest" step="any">
+
+            <button type="submit">Add Mortgage Account</button>
+        </form>
+    </div>
+
+    <div class="tabs">
+        <button class="tab-button active" data-tab="income">View Income</button>
+        <button class="tab-button" data-tab="expenses">View Expenses</button>
+        <button class="tab-button" data-tab="accounts">View Accounts</button>
+        <button class="tab-button" data-tab="summary">View Summary</button>
+    </div>
+
+    <div id="income" class="tab-pane active">
+        <h2>Income Details</h2>
+        <table id="income-table">
+            <thead>
+                <tr>
+                    <th>Source</th>
+                    <th>Weekly</th>
+                    <th>Fortnightly</th>
+                    <th>Monthly</th>
+                    <th>Quarterly</th>
+                    <th>Yearly</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="totals-container">
+            <p>Total Weekly: <span id="total-weekly-income"></span></p>
+            <p>Total Fortnightly: <span id="total-fortnightly-income"></span></p>
+            <p>Total Monthly: <span id="total-monthly-income"></span></p>
+            <p>Total Quarterly: <span id="total-quarterly-income"></span></p>
+            <p>Total Yearly: <span id="total-yearly-income"></span></p>
+        </div>
+    </div>
+
+    <div id="expenses" class="tab-pane">
+        <h2>Expense Details</h2>
+        <table id="expense-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Category</th>
+                    <th>Daily</th>
+                    <th>Weekly</th>
+                    <th>Fortnightly</th>
+                    <th>Monthly</th>
+                    <th>Quarterly</th>
+                    <th>Yearly</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <div class="totals-container">
+            <p>Total Daily: <span id="total-daily-expense"></span></p>
+            <p>Total Weekly: <span id="total-weekly-expense"></span></p>
+            <p>Total Fortnightly: <span id="total-fortnightly-expense"></span></p>
+            <p>Total Monthly: <span id="total-monthly-expense"></span></p>
+            <p>Total Quarterly: <span id="total-quarterly-expense"></span></p>
+            <p>Total Yearly: <span id="total-yearly-expense"></span></p>
+        </div>
+    </div>
+
+    <div id="accounts" class="tab-pane">
+        <h2>Account Details</h2>
+        <h3>Everyday Account(s)</h3>
+        <table id="everyday-account-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Bank</th>
+                    <th>Balance</th>
+                    <th>Interest Rate</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <h3>Saving Account(s)</h3>
+        <table id="savings-account-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Bank</th>
+                    <th>Balance</th>
+                    <th>Interest Rate</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <h3>Offset Account(s)</h3>
+        <table id="offset-account-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Bank</th>
+                    <th>Balance</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <h3>Credit Card Account(s)</h3>
+        <table id="credit-account-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Bank</th>
+                    <th>Available</th>
+                    <th>Limit</th>
+                    <th>Interest Rate</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+        <h3>Mortgage Account(s)</h3>
+        <table id="mortgage-account-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Bank</th>
+                    <th>Owing</th>
+                    <th>Interest Rate</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+
+    <div id="summary" class="tab-pane">
+        <h2>Summary</h2>
+        <div class="summary-cards">
+            <div class="summary-card">
+                <h3>Total Income</h3>
+                <p class="summary-value" id="total-income-card"></p>
+            </div>
+            <div class="summary-card">
+                <h3>Total Expenses</h3>
+                <p class="summary-value" id="total-expenses-card"></p>
+            </div>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>

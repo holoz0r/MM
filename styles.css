@@ -1,0 +1,413 @@
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 30px;
+    background-color: #f4f4f4;
+    color: #333;
+    transition: background-color 0.3s, color 0.3s;
+    line-height: 1.7;
+}
+
+body.dark-mode {
+    background-color: #121212;
+    color: #eee;
+}
+
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
+    padding: 30px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+}
+
+body.dark-mode .container {
+    background-color: #202020;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+}
+
+.header-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    position: sticky;
+    top: 0;
+    background-color: #f4f4f4;
+    z-index: 100;
+}
+
+body.dark-mode .header-row {
+    background-color: #121212;
+}
+
+.header-buttons {
+    display: flex;
+    gap: 15px;
+}
+
+.theme-switch-container {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+h1 {
+    margin: 0 0 20px 0;
+    color: #2ecc71;
+    border-bottom: 2px solid #eee;
+    padding-bottom: 15px;
+    font-size: 2.2em;
+}
+
+body.dark-mode h1 {
+    color: #27ae60;
+    border-bottom-color: #333;
+}
+
+.form-tabs {
+    display: flex;
+    margin-bottom: 30px;
+}
+
+.form-tab-button {
+    padding: 15px 30px;
+    border: none;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 8px 8px 0 0;
+    margin-right: 8px;
+    font-size: 1.1em;
+}
+
+body.dark-mode .form-tab-button {
+    background-color: #303030;
+    color: #eee;
+}
+
+.form-tab-button.active {
+    background-color: #ddd;
+    border-bottom: 3px solid #2ecc71;
+}
+
+body.dark-mode .form-tab-button.active {
+    background-color: #404040;
+    border-bottom-color: #27ae60;
+}
+
+.form-pane {
+    display: none;
+    padding: 25px;
+    border: 1px solid #ddd;
+    border-radius: 0 0 8px 8px;
+    margin-bottom: 30px;
+}
+
+body.dark-mode .form-pane {
+    border-color: #333;
+}
+
+.form-pane.active {
+    display: block;
+}
+
+form {
+    margin-bottom: 30px;
+    padding: 25px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+body.dark-mode form {
+    border-color: #333;
+    background-color: #303030;
+}
+
+label {
+    display: block;
+    margin-bottom: 10px;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+    width: calc(100% - 22px);
+    padding: 12px;
+    margin-bottom: 20px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    background-color: #fff;
+    color: #333;
+    font-size: 1em;
+}
+
+body.dark-mode input[type="text"],
+body.dark-mode input[type="number"],
+body.dark-mode select {
+    border-color: #444;
+    background-color: #3a3a3a;
+    color: #eee;
+}
+
+button[type="submit"],
+#save-button,
+#file-input-label { /* added file input label*/
+    padding: 15px 30px;
+    background-color: #2ecc71;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    font-size: 1.1em;
+    margin: 5px;
+}
+
+button[type="submit"]:hover,
+#save-button:hover,
+#file-input-label:hover { /* added file input label hover*/
+    background-color: #27ae60;
+}
+
+.tabs {
+    display: flex;
+    margin-bottom: 30px;
+    border-bottom: 1px solid #ddd;
+}
+
+body.dark-mode .tabs {
+    border-bottom-color: #333;
+}
+
+.tab-button {
+    padding: 15px 30px;
+    border: none;
+    background-color: #f0f0f0;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    border-radius: 8px 8px 0 0;
+    margin-right: 8px;
+    font-size: 1.1em;
+}
+
+body.dark-mode .tab-button {
+    background-color: #303030;
+    color: #eee;
+}
+
+.tab-button.active {
+    background-color: #ddd;
+    border-bottom: 3px solid #2ecc71;
+}
+
+body.dark-mode .tab-button.active {
+    background-color: #404040;
+    border-bottom-color: #27ae60;
+}
+
+.tab-pane {
+    display: none;
+    padding: 25px;
+    border: 1px solid #ddd;
+    border-radius: 0 0 8px 8px;
+}
+
+body.dark-mode .tab-pane {
+    border-color: #333;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 30px;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 15px 20px;
+    text-align: left;
+    font-size: 1em;
+}
+
+body.dark-mode th, body.dark-mode td {
+    border-color: #444;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+    font-size: 1.1em;
+}
+
+body.dark-mode th {
+    background-color: #404040;
+    color: #eee;
+}
+
+.totals-container {
+    margin-top: 25px;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    font-size: 1em;
+}
+
+body.dark-mode .totals-container {
+    background-color: #3a3a3a;
+}
+
+.summary-cards {
+    display: flex;
+    justify-content: space-around;
+    gap: 25px;
+}
+
+.summary-card {
+    border: 1px solid #ddd;
+    padding: 25px;
+    width: 45%;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    font-size: 1em;
+}
+
+body.dark-mode .summary-card {
+    background-color: #303030;
+    border-color: #333;
+}
+
+.summary-card h3 {
+    font-size: 1.3em;
+}
+
+.summary-value {
+    font-size: 1.2em;
+}
+
+/* Theme switch styles */
+.switch {
+    position: relative;
+    display: inline-block;
+    width: 60px;
+    height: 34px;
+}
+
+.switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 26px;
+    width: 26px;
+    left: 4px;
+    bottom: 4px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #2ecc71;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #2ecc71;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(26px);
+    -ms-transform: translateX(26px);
+    transform: translateX(26px);
+}
+
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}
+
+/* New Styles for Edit/Save/Cancel Buttons */
+.action-button {
+    padding: 8px 15px;
+    margin: 3px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-size: 1em;
+}
+
+.edit-button {
+    background-color: #ffc107;
+    color: #333;
+}
+
+.edit-button:hover {
+    background-color: #ffca2c;
+}
+
+.delete-button {
+    background-color: #dc3545;
+    color: white;
+}
+
+.delete-button:hover {
+    background-color: #c82333;
+}
+
+.save-button {
+    background-color: #28a745;
+    color: white;
+}
+
+.save-button:hover {
+    background-color: #218838;
+}
+
+.cancel-button {
+    background-color: #6c757d;
+    color: white;
+}
+
+.cancel-button:hover {
+    background-color: #5a6268;
+}
+
+/* Style for editing input fields in table cells */
+td.editing input[type="text"] {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
