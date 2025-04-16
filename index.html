@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Budget Tracker</title>
+    <link rel="stylesheet" href="style.css">
+
+</head>
+<body>
+    <div class="header">
+        <h1 id="header-title"></h1>
+        <div id="header-calculations">
+        </div>
+        <div id="net-position">
+            <span id="net-position-debt"></span>
+            <span id="net-position-money"></span>
+        </div>
+        <button id="save-button">Save Data</button>
+        <button id="load-button">Load Data</button>
+    </div>
+
+    <div class="input-form">
+        <h2>Add Income</h2>
+        <label for="income-amount">Amount:</label>
+        <input type="number" id="income-amount" required>
+
+        <label for="income-source">Source:</label>
+        <input type="text" id="income-source" required>
+
+        <label for="income-frequency">Frequency:</label>
+        <select id="income-frequency">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="fortnightly">Fortnightly</option>
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="yearly">Yearly</option>
+        </select>
+
+        <button onclick="addIncome()">Add Income</button>
+    </div>
+
+    <div id="income-table-container">
+        <h2>Income Entries</h2>
+        <table id="income-table">
+            <thead>
+                <tr>
+                    <th>Amount</th>
+                    <th>Source</th>
+                    <th>Frequency</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="income-table-body">
+            </tbody>
+        </table>
+    </div>
+
+    <div id="frequency-summary">
+        <h2>Income Summary</h2>
+        <div id="frequency-summary-details">
+        </div>
+    </div>
+
+    <div class="expense-form">
+        <h2>Add Expense</h2>
+        <label for="expense-amount">Amount:</label>
+        <input type="number" id="expense-amount" required>
+
+        <label for="expense-source">Description:</label>
+        <input type="text" id="expense-source" required>
+
+        <label for="expense-category">Category:</label>
+        <input type="text" id="expense-category" required>
+
+        <label for="expense-frequency">Frequency:</label>
+        <select id="expense-frequency">
+            <option value="daily">Daily</option>
+            <option value="weekly">Weekly</option>
+            <option value="fortnightly">Fortnightly</option>
+            <option value="monthly">Monthly</option>
+            <option value="quarterly">Quarterly</option>
+            <option value="yearly">Yearly</option>
+        </select>
+
+        <button onclick="addExpense()">Add Expense</button>
+    </div>
+
+    <div id="expense-table-container">
+        <h2>Expense Entries</h2>
+        <table id="expense-table">
+            <thead>
+                <tr>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Category</th>
+                    <th>Frequency</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="expense-table-body">
+            </tbody>
+        </table>
+    </div>
+
+    <div id="expense-summary">
+        <h2>Expense Summary</h2>
+        <div id="expense-summary-details">
+        </div>
+    </div>
+
+<div id="expense-analysis-container">
+        </div>
+
+
+    <div id="account-input-container">
+        <h2>Add Account</h2>
+        <label for="account-type">Account Type:</label>
+        <select id="account-type" onchange="showAccountForm()">
+            <option value="">Select Account Type</option>
+            <option value="everyday">Everyday Account</option>
+            <option value="credit">Credit Account</option>
+            <option value="offset">Offset Account</option>
+            <option value="mortgage">Mortgage Account</option>
+        </select>
+
+        <div id="everyday-form" class="account-form">
+            <h3>Everyday Account</h3>
+            <label for="everyday-name">Name:</label>
+            <input type="text" id="everyday-name">
+            <label for="everyday-bank">Bank:</label>
+            <input type="text" id="everyday-bank">
+            <label for="everyday-balance">Balance:</label>
+            <input type="number" id="everyday-balance">
+            <label for="everyday-interest-rate">Interest Rate (%):</label>
+            <input type="number" id="everyday-interest-rate" step="0.01">
+            <button onclick="addEverydayAccount()">Add Everyday Account</button>
+        </div>
+
+        <div id="credit-form" class="account-form">
+            <h3>Credit Account</h3>
+            <label for="credit-name">Name:</label>
+            <input type="text" id="credit-name">
+            <label for="credit-bank">Bank:</label>
+            <input type="text" id="credit-bank">
+            <label for="credit-available-balance">Available Balance:</label>
+            <input type="number" id="credit-available-balance">
+            <label for="credit-limit">Limit:</label>
+            <input type="number" id="credit-limit">
+            <label for="credit-interest-rate">Interest Rate (%):</label>
+            <input type="number" id="credit-interest-rate" step="0.01">
+            <button onclick="addCreditAccount()">Add Credit Account</button>
+        </div>
+
+        <div id="offset-form" class="account-form">
+            <h3>Offset Account</h3>
+            <label for="offset-name">Name:</label>
+            <input type="text" id="offset-name">
+            <label for="offset-bank">Bank:</label>
+            <input type="text" id="offset-bank">
+            <label for="offset-balance">Balance:</label>
+            <input type="number" id="offset-balance">
+            <button onclick="addOffsetAccount()">Add Offset Account</button>
+        </div>
+
+        <div id="mortgage-form" class="account-form">
+            <h3>Mortgage Account</h3>
+            <label for="mortgage-name">Name:</label>
+            <input type="text" id="mortgage-name">
+            <label for="mortgage-bank">Bank:</label>
+            <input type="text" id="mortgage-bank">
+            <label for="mortgage-balance">Balance:</label>
+            <input type="number" id="mortgage-balance">
+            <label for="mortgage-interest-rate">Interest Rate (%):</label>
+            <input type="number" id="mortgage-interest-rate" step="0.01">
+            <button onclick="addMortgageAccount()">Add Mortgage Account</button>
+        </div>
+    </div>
+
+    <div id="accounts-section">
+        <h2>Accounts</h2>
+
+        <div id="everyday-accounts-container">
+            <h3>Everyday Accounts</h3>
+            <table id="everyday-accounts-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Bank</th>
+                        <th>Balance</th>
+                        <th>Interest Rate</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="everyday-accounts-body">
+                </tbody>
+            </table>
+        </div>
+
+        <div id="credit-accounts-container">
+            <h3>Credit Accounts</h3>
+            <table id="credit-accounts-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Bank</th>
+                        <th>Available Balance</th>
+                        <th>Limit</th>
+                        <th>Interest Rate</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="credit-accounts-body">
+                </tbody>
+            </table>
+        </div>
+
+        <div id="offset-accounts-container">
+            <h3>Offset Accounts</h3>
+            <table id="offset-accounts-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Bank</th>
+                        <th>Balance</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="offset-accounts-body">
+                </tbody>
+            </table>
+        </div>
+
+        <div id="mortgage-accounts-container">
+            <h3>Mortgage Accounts</h3>
+            <table id="mortgage-accounts-table">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Bank</th>
+                        <th>Balance</th>
+                        <th>Interest Rate</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="mortgage-accounts-body">
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="income.js"></script>
+    <script src="accounts.js"></script>
+    <script src="expenses.js"></script>
+    <script src="io.js"></script>
+    <script src="analyse.js"></script>
+    <script>
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const saveButton = document.getElementById('save-button');
+            const loadButton = document.getElementById('load-button');
+
+            if (saveButton) {
+                saveButton.addEventListener('click', saveData);
+            }
+            if (loadButton) {
+                loadButton.addEventListener('click', loadData);
+            }
+        });
+    </script>
+</body>
+</html>
