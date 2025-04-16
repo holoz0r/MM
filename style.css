@@ -1,0 +1,410 @@
+/* Base Styles */
+body {
+    font-family: sans-serif;
+    margin: 0;
+    background-color: #f4f4f4;
+    color: #333;
+    line-height: 1.6;
+}
+
+.header {
+    background-color: #23403B;
+    color: #f0f0f0;
+    padding: 15px 20px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    justify-content: flex-end;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.header h1 {
+    margin: 0;
+    font-size: 1.5em;
+    flex-grow: 1; /* Title takes up available space */
+    text-align: left;
+}
+
+#header-calculations {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+#header-calculations table {
+    border-collapse: collapse;
+    font-size: 0.9em;
+}
+
+#header-calculations th,
+#header-calculations td {
+    border: 1px solid #ddd;
+    padding: 5px 8px;
+    text-align: right;
+}
+
+#header-calculations th {
+    background-color: #637A6C;
+    color: #f0f0f0;
+    font-weight: bold;
+}
+
+#net-position {
+    display: flex;
+    gap: 10px;
+    font-weight: bold;
+}
+
+#net-position-debt {
+    color: red;
+}
+
+#net-position-money {
+    color: green;
+}
+
+.header button {
+    background-color: #69C99F;
+    color: #23403B;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+}
+
+.header button:hover {
+    background-color: #6D9E89;
+}
+
+/* Input Forms (Income and Expense) */
+.input-form,
+.expense-form,
+#account-input-container {
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 600px;
+}
+
+.input-form h2,
+.expense-form h2,
+#account-input-container h2 {
+    color: #23403B;
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+.input-form label,
+.expense-form label,
+.account-form label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: bold;
+}
+
+.input-form input[type="number"],
+.input-form input[type="text"],
+.input-form select,
+.expense-form input[type="number"],
+.expense-form input[type="text"],
+.expense-form select,
+.account-form input[type="text"],
+.account-form input[type="number"] {
+    width: calc(100% - 16px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+.input-form button,
+.expense-form button,
+.account-form button {
+    background-color: #69C99F;
+    color: #23403B;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.input-form button:hover,
+.expense-form button:hover,
+.account-form button:hover {
+    background-color: #6D9E89;
+}
+
+/* Table Containers */
+#income-table-container,
+#expense-table-container,
+#accounts-section > div,
+#expense-analysis-container {
+    margin: 20px auto;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow-x: auto; /* Enable horizontal scrolling for tables */
+    max-width: 95%; /* Allow tables to take up more width on larger screens */
+}
+
+#income-table-container h2,
+#expense-table-container h2,
+#accounts-section h2,
+#accounts-section > div > h3,
+#expense-analysis-container h2 {
+    color: #23403B;
+    padding: 15px;
+    margin-top: 0;
+    text-align: center;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+}
+
+#accounts-section > div > h3 {
+    text-align: left;
+    padding-left: 20px;
+    background-color: transparent;
+    border-bottom: none;
+    margin-top: 20px;
+}
+
+/* Tables (Income, Expense, Accounts, Analysis) */
+#income-table,
+#expense-table,
+#accounts-section table,
+#expense-analysis-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px; /* Ensure tables don't collapse too much */
+}
+
+#income-table th, #income-table td,
+#expense-table th, #expense-table td,
+#accounts-section th, #accounts-section td,
+#expense-analysis-table th, #expense-analysis-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    white-space: nowrap; /* Prevent text wrapping in cells */
+}
+
+#income-table th,
+#expense-table th,
+#accounts-section th,
+#expense-analysis-table th {
+    background-color: #637A6C;
+    color: #f0f0f0;
+    font-weight: bold;
+}
+
+#income-table tbody tr:nth-child(even),
+#expense-table tbody tr:nth-child(even),
+#accounts-section tbody tr:nth-child(even),
+#expense-analysis-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* Action Buttons (Edit, Delete, Save, Cancel) */
+.action-buttons {
+    display: flex;
+    gap: 5px; /* Space between buttons */
+    justify-content: flex-start; /* Align buttons to the left */
+}
+
+.action-buttons button {
+    background-color: #ddd;
+    color: #333;
+    border: none;
+    padding: 8px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9em;
+    transition: background-color 0.3s ease;
+}
+
+.action-buttons button:hover {
+    background-color: #ccc;
+}
+
+.edit-button {
+    background-color: #6D9E89;
+    color: #fff;
+}
+
+.edit-button:hover {
+    background-color: #5a8273;
+}
+
+.delete-button {
+    background-color: #d9534f;
+    color: #fff;
+}
+
+.delete-button:hover {
+    background-color: #c9302c;
+}
+
+.save-button {
+    background-color: #5cb85c;
+    color: #fff;
+}
+
+.save-button:hover {
+    background-color: #4cae4c;
+}
+
+.cancel-button {
+    background-color: #f0ad4e;
+    color: #fff;
+}
+
+.cancel-button:hover {
+    background-color: #eea236;
+}
+
+/* Summary Sections (Income and Expense) */
+#frequency-summary,
+#expense-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin: 20px auto;
+    max-width: 95%; /* More width for summaries */
+    padding: 15px;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+#frequency-summary h2,
+#expense-summary h2 {
+    color: #23403B;
+    width: 100%;
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 15px;
+}
+
+#frequency-summary-details,
+#expense-summary-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    width: 100%;
+    justify-content: center;
+}
+
+.summary-card {
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    min-width: 150px; /* Ensure cards don't get too narrow */
+    box-shadow: 2px 2px 5px #eee;
+    text-align: center;
+    background-color: #f9f9f9;
+    flex-grow: 1; /* Allow cards to take up available space */
+}
+
+.summary-card h3 {
+    margin-top: 0;
+    color: #555;
+    font-size: 1.1em;
+    margin-bottom: 8px;
+}
+
+.summary-card p {
+    color: #23403B;
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .header {
+        flex-direction: column; /* Stack header items on smaller screens */
+        align-items: flex-start; /* Align items to the left */
+        gap: 10px;
+    }
+
+    .header h1 {
+        text-align: left;
+        margin-bottom: 10px;
+    }
+
+    #header-calculations {
+        width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto; /* Enable horizontal scrolling for calculations table if needed */
+    }
+
+    #net-position {
+        width: 100%;
+        justify-content: flex-start;
+    }
+
+    .input-form,
+    .expense-form,
+    #account-input-container,
+    #income-table-container,
+    #expense-table-container,
+    #accounts-section > div,
+    #expense-analysis-container,
+    #frequency-summary,
+    #expense-summary {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .summary-card {
+        width: calc(50% - 20px); /* Two cards per row on smaller screens */
+    }
+
+    #income-table,
+    #expense-table,
+    #accounts-section table,
+    #expense-analysis-table {
+        font-size: 0.9em; /* Smaller font on smaller screens */
+    }
+
+    #income-table th, #income-table td,
+    #expense-table th, #expense-table td,
+    #accounts-section th, #accounts-section td,
+    #expense-analysis-table th, #expense-analysis-table td {
+        padding: 8px;
+    }
+
+    .action-buttons button {
+        padding: 6px 10px;
+        font-size: 0.8em;
+    }
+}
+
+@media (max-width: 480px) {
+    .header {
+        align-items: center; /* Center header items on very small screens */
+    }
+
+    .header h1 {
+        text-align: center;
+    }
+
+    .summary-card {
+        width: calc(100% - 20px); /* One card per row on very small screens */
+    }
+}
