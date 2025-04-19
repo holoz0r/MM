@@ -1,5 +1,5 @@
-let accounts = []; // Array to store account objects
-let editingAccountIndex = -1; // To track the index of the account being edited
+let accounts = []; 
+let editingAccountIndex = -1; 
 
 function showAccountForm() {
     const accountType = document.getElementById('account-type').value;
@@ -112,7 +112,7 @@ function addOrUpdateAccount(account) {
     } else {
         accounts.push(account);
     }
-    renderAccountsTables(); // Call the new rendering function
+    renderAccountsTables(); 
 }
 
 function renderAccountsTables() {
@@ -337,7 +337,7 @@ function clearAccountForms() {
     document.getElementById('mortgage-balance').value = '';
     document.getElementById('mortgage-interest-rate').value = '';
 
-    // Hide all forms after clearing
+    
     showAccountForm();
 }
 
@@ -358,5 +358,5 @@ function enableAllAccountEditButtons() {
     });
 }
 
-// Initial rendering of accounts tables (if any data exists in local storage, for example)
+
 renderAccountsTables();
