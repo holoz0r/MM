@@ -101,6 +101,7 @@ function addIncome() {
 
     renderFrequencySummary(); // Call AFTER updating incomeEntries
     renderExpenseAnalysisTable();
+    renderAccountsTables();
 
     // Clear the form
     amountInput.value = '';
@@ -160,6 +161,7 @@ function deleteIncome(index) {
         renderIncomeTable();
         renderFrequencySummary(); // Update summary after deletion
         renderExpenseAnalysisTable();
+        renderAccountsTables();
     }
 }
 
@@ -241,7 +243,8 @@ function saveEditedRow(index) {
     renderIncomeRow(updatedIncome, index, row);
     renderFrequencySummary(); // Update summary after saving
     enableAllEditButtons();
-    renderExpenseAnalysisTable(); 
+    renderExpenseAnalysisTable();
+    renderAccountsTables();
 }
 
 function disableAllEditButtons(currentIndex) {
