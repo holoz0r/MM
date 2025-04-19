@@ -30,40 +30,96 @@ function loadData() {
             reader.onload = (e) => {
                 try {
                     const loadedData = JSON.parse(e.target.result);
-                    if (loadedData.accounts && typeof renderAccountsTables === 'function') {
+                    let loadSuccessful = true;
+
+                    if (loadedData.accounts) {
                         accounts = loadedData.accounts;
-                        renderAccountsTables();
+                        if (typeof renderAccountsTables === 'function') {
+                            renderAccountsTables();
+                        } else {
+                            console.error('Error: renderAccountsTables is not defined when loading accounts.');
+                            alert('Error loading account data. Please ensure the application scripts are loaded correctly.');
+                            loadSuccessful = false;
+                        }
                     }
                     if (loadedData.income) {
                         incomeEntries = loadedData.income;
-                        if (typeof renderIncomeTable === 'function' && typeof renderFrequencySummary === 'function') {
+                        if (typeof renderIncomeTable === 'function') {
                             renderIncomeTable();
-                            renderFrequencySummary();
                         } else {
-                            console.error('Error: renderIncomeTable or renderFrequencySummary is not defined when loading income.');
+                            console.error('Error: renderIncomeTable is not defined when loading income.');
                             alert('Error loading income data. Please ensure the application scripts are loaded correctly.');
+                            loadSuccessful = false;
                         }
                     }
                     if (loadedData.expenses) {
                         expenseEntries = loadedData.expenses;
-                        if (typeof renderExpenseTable === 'function' && typeof renderExpenseSummary === 'function') {
+                        if (typeof renderExpenseTable === 'function') {
                             renderExpenseTable();
-                            renderExpenseSummary();
                         } else {
-                            console.error('Error: renderExpenseTable or renderExpenseSummary is not defined when loading expenses.');
+                            console.error('Error: renderExpenseTable is not defined when loading expenses.');
                             alert('Error loading expense data. Please ensure the application scripts are loaded correctly.');
+                            loadSuccessful = false;
                         }
                     }
 
-                    // Call renderExpenseAnalysisTable after loading income and expenses
+                    // Call all rendering and calculation functions after loading data
+                    if (typeof renderFrequencySummary === 'function') {
+                        renderFrequencySummary();
+                    } else {
+                        console.error('Error: renderFrequencySummary is not defined after loading data.');
+                    }
+
+                    if (typeof renderExpenseSummary === 'function') {
+                        renderExpenseSummary();
+                    } else {
+                        console.error('Error: renderExpenseSummary is not defined after loading data.');
+                    }
+
+                    if (typeof renderNetPositionSummary === 'function') {
+                        renderNetPositionSummary();
+                    } else {
+                        console.error('Error: renderNetPositionSummary is not defined after loading data.');
+                    }
+
                     if (typeof renderExpenseAnalysisTable === 'function') {
                         renderExpenseAnalysisTable();
-                        renderHeaderCalculations();
                     } else {
                         console.error('Error: renderExpenseAnalysisTable is not defined after loading data.');
                     }
 
-                    alert('Data loaded successfully!');
+                    if (typeof renderCategoryAnalysisTable === 'function') {
+                        renderCategoryAnalysisTable();
+                    } else {
+                        console.error('Error: renderCategoryAnalysisTable is not defined after loading data.');
+                    }
+
+                    if (typeof renderHeaderCalculations === 'function') {
+                        renderHeaderCalculations();
+                    } else {
+                        console.error('Error: renderHeaderCalculations is not defined after loading data.');
+                    }
+
+                    const countdownTabButton = document.querySelector('.tab-buttons-header button[data-tab="countdown"]');
+                    if (countdownTabButton && typeof renderCountdownData === 'function') {
+                        renderCountdownData();
+                    } else if (countdownTabButton) {
+                        console.error('Error: renderCountdownData is not defined after loading data.');
+                    }
+
+                    if (loadSuccessful) {
+                        alert('Data loaded successfully!');
+                        // Programmatically trigger a click on the 'View & Edit' tab button
+                        const viewTabButton = document.querySelector('.tab-buttons-header button[data-tab="view"]');
+                        if (viewTabButton) {
+                            viewTabButton.click();
+                        } else {
+                            console.warn('Warning: View & Edit tab button not found. Navigation to View tab failed.');
+                        }
+                        // Set a flag in localStorage to indicate data was just loaded
+                        localStorage.setItem('justLoadedData', 'true');
+                    }
+
                 } catch (error) {
                     alert('Error loading data: Invalid JSON file.');
                     console.error('Error loading data:', error);
