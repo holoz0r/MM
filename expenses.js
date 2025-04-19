@@ -104,6 +104,7 @@ function addExpense() {
 
     renderExpenseSummary(); // Call AFTER updating expenseEntries
     renderExpenseAnalysisTable();
+    renderAccountsTables();
 
     // Clear the form
     amountInput.value = '';
@@ -168,6 +169,7 @@ function deleteExpense(index) {
         renderExpenseTable();
         renderExpenseSummary(); 
         renderExpenseAnalysisTable();
+        renderAccountsTables();
     }
 }
 
@@ -257,6 +259,7 @@ function saveEditedExpenseRow(index) {
     renderExpenseSummary(); // Update summary after saving
     enableAllExpenseEditButtons();
     renderExpenseAnalysisTable(); 
+    renderAccountsTables();
 }
 
 function disableAllExpenseEditButtons(currentIndex) {
