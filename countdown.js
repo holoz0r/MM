@@ -1,9 +1,12 @@
+// countdown.js
+
 document.addEventListener('DOMContentLoaded', () => {
     const countdownTabButton = document.querySelector('.tab-button[data-tab="countdown"]');
     if (countdownTabButton) {
         countdownTabButton.addEventListener('click', renderCountdownData);
     }
 
+    // Also render if the page is loaded with the countdown tab active (e.g., via a direct link)
     const initialTab = document.querySelector('.tab-button.active');
     if (initialTab && initialTab.getAttribute('data-tab') === 'countdown') {
         renderCountdownData();
@@ -14,10 +17,6 @@ function calculateTotalAssetsForCountdown(accounts) {
     let totalAssets = 0;
     accounts.forEach(account => {
         if (account.type !== 'mortgage' && account.type !== 'credit' && !isNaN(parseFloat(account.balance))) {
-            totalAssets += parseFloat(account.balance);
-        } else if (account.type === 'offset' && !isNaN(parseFloat(account.balance))) {
-            totalAssets += parseFloat(account.balance);
-        } else if (account.type === 'everyday' && !isNaN(parseFloat(account.balance))) {
             totalAssets += parseFloat(account.balance);
         }
     });
@@ -33,6 +32,7 @@ function calculateTotalLiabilitiesForCountdown(accounts) {
                 totalLiabilities += owing;
             }
         } else if (account.type === 'mortgage' && !isNaN(parseFloat(account.balance))) {
+            // Mortgage balance is typically negative, so we add its absolute value as a liability
             totalLiabilities += Math.abs(parseFloat(account.balance));
         }
     });
@@ -94,8 +94,10 @@ function renderCountdownData() {
     const overallPositionElement = document.getElementById('overall-position');
     const timeUntilNoMoneyBody = document.getElementById('time-until-no-money-body');
     const dateOfNoFundsElement = document.getElementById('date-of-no-funds');
+    const assetBreakdownBody = document.getElementById('asset-breakdown-body');
+    const liabilityBreakdownBody = document.getElementById('liability-breakdown-body');
 
-    if (!totalAssetsElement || !totalLiabilitiesElement || !overallPositionElement || !timeUntilNoMoneyBody || !dateOfNoFundsElement) {
+    if (!totalAssetsElement || !totalLiabilitiesElement || !overallPositionElement || !timeUntilNoMoneyBody || !dateOfNoFundsElement || !assetBreakdownBody || !liabilityBreakdownBody) {
         console.error('One or more countdown elements not found in the HTML.');
         return;
     }
@@ -141,8 +143,42 @@ function renderCountdownData() {
 
     const projectedDate = getProjectedDateOfNoFunds(totalAssets);
     dateOfNoFundsElement.textContent = projectedDate;
+
+    // Render Asset Breakdown
+    assetBreakdownBody.innerHTML = '';
+    accounts.forEach(account => {
+        if (account.type !== 'mortgage' && account.type !== 'credit' && parseFloat(account.balance) > 0 && !isNaN(parseFloat(account.balance))) {
+            const row = assetBreakdownBody.insertRow();
+            const nameCell = row.insertCell();
+            const balanceCell = row.insertCell();
+            nameCell.textContent = account.name || account.bank || 'Account';
+            balanceCell.textContent = `$${parseFloat(account.balance).toFixed(2)}`;
+        }
+    });
+
+    // Render Liability Breakdown
+    liabilityBreakdownBody.innerHTML = '';
+    accounts.forEach(account => {
+        if (account.type === 'credit') {
+            const owing = parseFloat(account.limit) - parseFloat(account.availableBalance);
+            if (!isNaN(owing) && owing > 0) {
+                const row = liabilityBreakdownBody.insertRow();
+                const nameCell = row.insertCell();
+                const debtCell = row.insertCell();
+                nameCell.textContent = account.name || account.bank || 'Credit Card';
+                debtCell.textContent = `$${owing.toFixed(2)}`;
+            }
+        } else if (account.type === 'mortgage' && parseFloat(account.balance) < 0 && !isNaN(parseFloat(account.balance))) {
+            const row = liabilityBreakdownBody.insertRow();
+            const nameCell = row.insertCell();
+            const debtCell = row.insertCell();
+            nameCell.textContent = account.name || account.bank || 'Mortgage';
+            debtCell.textContent = `$${Math.abs(parseFloat(account.balance)).toFixed(2)}`;
+        }
+    });
 }
 
+// Ensure the countdown data is rendered if the data is loaded and the tab is active
 document.addEventListener('dataUpdated', () => {
     const countdownTabButton = document.querySelector('.tab-button[data-tab="countdown"]');
     if (countdownTabButton && countdownTabButton.classList.contains('active')) {
