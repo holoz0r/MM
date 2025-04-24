@@ -662,3 +662,36 @@ body {
     font-weight: bold;
     color: #d9534f; /* Indicate a critical state */
 }
+
+.asset-breakdown,
+.liability-breakdown {
+    margin-top: 15px;
+}
+
+.asset-breakdown h4,
+.liability-breakdown h4 {
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.asset-breakdown table,
+.liability-breakdown table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 5px;
+}
+
+.asset-breakdown th, .asset-breakdown td,
+.liability-breakdown th, .liability-breakdown td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.asset-breakdown th,
+.liability-breakdown th {
+    background-color: #f9f9f9;
+    font-weight: bold;
+}
