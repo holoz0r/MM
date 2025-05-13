@@ -550,7 +550,7 @@ body {
 #countdown {
     padding: 20px;
     background-color: #fff;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    box-shadow:0 2px 5px rgba(0, 0, 0, 0.1);
     margin: 20px auto;
     max-width: 95%;
 }
@@ -643,7 +643,7 @@ body {
 }
 
 #time-until-no-money-table td {
-    text-align: center; /* Center the content of the table cells */
+    text-align: center;
 }
 
 .date-of-no-funds {
@@ -660,7 +660,7 @@ body {
 .date-of-no-funds p {
     font-size: 1.2em;
     font-weight: bold;
-    color: #d9534f; /* Indicate a critical state */
+    color: #d9534f;
 }
 
 .asset-breakdown,
@@ -694,4 +694,62 @@ body {
 .liability-breakdown th {
     background-color: #f9f9f9;
     font-weight: bold;
+}
+
+.net-time-until-no-money {
+    margin-top: 20px;
+}
+
+.net-time-until-no-money h3 {
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#net-time-until-no-money-table {
+    margin: 0 auto;
+    max-width: 80%;
+}
+
+#net-time-until-no-money-table th {
+    text-align: center;
+}
+
+#net-time-until-no-money-table td {
+    text-align: center;
+    display: block; /* Ensure block display for line breaks */
+}
+
+.overall-position.net-position {
+    margin-bottom: 10px;
+}
+
+.time-until-no-money-container {
+    display: flex;
+    gap: 20px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    width: 100%;
+}
+
+.time-until-no-money-container > div {
+    flex: 1;
+}
+
+.net-date-of-no-funds {
+    text-align: center;
+    margin-top: 20px;
+}
+
+.net-date-of-no-funds h3 {
+    color: #555;
+    margin-top: 0;
+    margin-bottom: 5px;
+}
+
+.net-date-of-no-funds p {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #d9534f;
 }
