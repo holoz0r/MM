@@ -1,12 +1,9 @@
-// countdown.js
-
 document.addEventListener('DOMContentLoaded', () => {
     const countdownTabButton = document.querySelector('.tab-button[data-tab="countdown"]');
     if (countdownTabButton) {
         countdownTabButton.addEventListener('click', renderCountdownData);
     }
 
-    // Also render if the page is loaded with the countdown tab active (e.g., via a direct link)
     const initialTab = document.querySelector('.tab-button.active');
     if (initialTab && initialTab.getAttribute('data-tab') === 'countdown') {
         renderCountdownData();
@@ -73,14 +70,14 @@ function getTotalExpensesForFrequency(frequency) {
     }, 0);
 }
 
-function getProjectedDateOfNoFunds(totalAssets) {
+function getProjectedDateOfNoFunds(amount) { 
     const currentTotalExpensesPerDay = getTotalExpensesForFrequency('daily');
 
-    if (currentTotalExpensesPerDay <= 0 || totalAssets <= 0) {
+    if (currentTotalExpensesPerDay <= 0 || amount <= 0) {
         return 'N/A';
     }
 
-    const daysUntilEmpty = totalAssets / currentTotalExpensesPerDay;
+    const daysUntilEmpty = amount / currentTotalExpensesPerDay;
     const currentDate = new Date();
     const futureDate = new Date(currentDate.getTime() + (daysUntilEmpty * 24 * 60 * 60 * 1000));
 
@@ -96,8 +93,10 @@ function renderCountdownData() {
     const dateOfNoFundsElement = document.getElementById('date-of-no-funds');
     const assetBreakdownBody = document.getElementById('asset-breakdown-body');
     const liabilityBreakdownBody = document.getElementById('liability-breakdown-body');
+    const netTimeUntilNoMoneyBody = document.getElementById('net-time-until-no-money-body');
+    const netDateOfNoFundsElement = document.getElementById('net-date-of-no-funds');
 
-    if (!totalAssetsElement || !totalLiabilitiesElement || !overallPositionElement || !timeUntilNoMoneyBody || !dateOfNoFundsElement || !assetBreakdownBody || !liabilityBreakdownBody) {
+    if (!totalAssetsElement || !totalLiabilitiesElement || !overallPositionElement || !timeUntilNoMoneyBody || !dateOfNoFundsElement || !assetBreakdownBody || !liabilityBreakdownBody || !netTimeUntilNoMoneyBody || !netDateOfNoFundsElement) {
         console.error('One or more countdown elements not found in the HTML.');
         return;
     }
@@ -118,31 +117,45 @@ function renderCountdownData() {
     }
 
     timeUntilNoMoneyBody.innerHTML = '';
-
-    const totalExpensesPerYear = getTotalExpensesForFrequency('yearly');
-    const totalExpensesPerMonth = getTotalExpensesForFrequency('monthly');
-    const totalExpensesPerFortnight = getTotalExpensesForFrequency('fortnightly');
-    const totalExpensesPerWeek = getTotalExpensesForFrequency('weekly');
-    const totalExpensesPerDay = getTotalExpensesForFrequency('daily');
-    const totalExpensesPerHour = getTotalExpensesForFrequency('hourly');
+    netTimeUntilNoMoneyBody.innerHTML = '';
 
     const timeCalculations = [
-        { unit: 'Years', duration: calculateTimeUntilNoMoney(totalAssets, totalExpensesPerYear), expense: totalExpensesPerYear, frequency: 'year' },
-        { unit: 'Months', duration: calculateTimeUntilNoMoney(totalAssets, totalExpensesPerMonth), expense: totalExpensesPerMonth, frequency: 'month' },
-        { unit: 'Fortnights', duration: calculateTimeUntilNoMoney(totalAssets, totalExpensesPerFortnight), expense: totalExpensesPerFortnight, frequency: 'fortnight' },
-        { unit: 'Weeks', duration: calculateTimeUntilNoMoney(totalAssets, totalExpensesPerWeek), expense: totalExpensesPerWeek, frequency: 'week' },
-        { unit: 'Days', duration: calculateTimeUntilNoMoney(totalAssets, totalExpensesPerDay), expense: totalExpensesPerDay, frequency: 'day' },
-        { unit: 'Hours', duration: calculateTimeUntilNoMoney(totalAssets, totalExpensesPerHour), expense: totalExpensesPerHour, frequency: 'hour' },
+        { unit: 'Years', duration: calculateTimeUntilNoMoney(totalAssets, getTotalExpensesForFrequency('yearly')), expense: getTotalExpensesForFrequency('yearly'), frequency: 'year' },
+        { unit: 'Months', duration: calculateTimeUntilNoMoney(totalAssets, getTotalExpensesForFrequency('monthly')), expense: getTotalExpensesForFrequency('monthly'), frequency: 'month' },
+        { unit: 'Fortnights', duration: calculateTimeUntilNoMoney(totalAssets, getTotalExpensesForFrequency('fortnightly')), expense: getTotalExpensesForFrequency('fortnightly'), frequency: 'fortnight' },
+        { unit: 'Weeks', duration: calculateTimeUntilNoMoney(totalAssets, getTotalExpensesForFrequency('weekly')), expense: getTotalExpensesForFrequency('weekly'), frequency: 'week' },
+        { unit: 'Days', duration: calculateTimeUntilNoMoney(totalAssets, getTotalExpensesForFrequency('daily')), expense: getTotalExpensesForFrequency('daily'), frequency: 'day' },
+        { unit: 'Hours', duration: calculateTimeUntilNoMoney(totalAssets, getTotalExpensesForFrequency('hourly')), expense: getTotalExpensesForFrequency('hourly'), frequency: 'hour' },
     ];
 
     timeCalculations.forEach(item => {
         const row = timeUntilNoMoneyBody.insertRow();
         const cell = row.insertCell();
-        cell.textContent = `${item.duration === Infinity ? '∞' : item.duration.toFixed(2)} ${item.unit} left at $${item.expense.toFixed(2)} per ${item.frequency}`;
+        cell.innerHTML = `${item.duration === Infinity ? '∞' : item.duration.toFixed(2)} ${item.unit} left at $${item.expense.toFixed(2)} per ${item.frequency}<br>`;
+    });
+
+    // Calculate and render Time Until No Money (Net)
+    const netTimeCalculations = [
+        { unit: 'Years', duration: calculateTimeUntilNoMoney(overallPosition, getTotalExpensesForFrequency('yearly')), expense: getTotalExpensesForFrequency('yearly'), frequency: 'year' },
+        { unit: 'Months', duration: calculateTimeUntilNoMoney(overallPosition, getTotalExpensesForFrequency('monthly')), expense: getTotalExpensesForFrequency('monthly'), frequency: 'month' },
+        { unit: 'Fortnights', duration: calculateTimeUntilNoMoney(overallPosition, getTotalExpensesForFrequency('fortnightly')), expense: getTotalExpensesForFrequency('fortnightly'), frequency: 'fortnight' },
+        { unit: 'Weeks', duration: calculateTimeUntilNoMoney(overallPosition, getTotalExpensesForFrequency('weekly')), expense: getTotalExpensesForFrequency('weekly'), frequency: 'week' },
+        { unit: 'Days', duration: calculateTimeUntilNoMoney(overallPosition, getTotalExpensesForFrequency('daily')), expense: getTotalExpensesForFrequency('daily'), frequency: 'day' },
+        { unit: 'Hours', duration: calculateTimeUntilNoMoney(overallPosition, getTotalExpensesForFrequency('hourly')), expense: getTotalExpensesForFrequency('hourly'), frequency: 'hour' },
+    ];
+
+    netTimeCalculations.forEach(item => {
+        const row = netTimeUntilNoMoneyBody.insertRow();
+        const cell = row.insertCell();
+        cell.innerHTML = `${item.duration === Infinity ? '∞' : item.duration.toFixed(2)} ${item.unit} left at $${item.expense.toFixed(2)} per ${item.frequency}<br>`;
     });
 
     const projectedDate = getProjectedDateOfNoFunds(totalAssets);
     dateOfNoFundsElement.textContent = projectedDate;
+
+    // Calculate and render Net Projected Date of No Funds
+    const netProjectedDate = getProjectedDateOfNoFunds(overallPosition);
+    netDateOfNoFundsElement.textContent = netProjectedDate;
 
     // Render Asset Breakdown
     assetBreakdownBody.innerHTML = '';
