@@ -11,9 +11,10 @@ This one is modelled after a spreadsheet I've been maintaining for years, and th
 
 1. Add your income (Done!)
 2. Add your expenses (Done!)
-3. See the delta between the two (Coming) 
+3. See the delta between the two (Done) 
 4. Add your mortgage, credit card, or saving accounts (Done)
-5. See somme analysis (Coming)
-6. See an assessment of how long you have to live (financially, at least)
+5. See some analysis (Done)
+6. See an assessment of how long you have to live (Done)
+7. Track your expenses in a simple manner against your budget. (Uses local browser storage)
 
-I'm not a professional web developer, my experience is data analytics and very probably having autism, so this tool is likely written quite poorly. 
+I'm not a professional web developer, my experience is data analytics and very probably having autism, so this tool is likely written quite poorly.
