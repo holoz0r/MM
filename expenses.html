@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Expense Tracker</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        /* 1. Style for the active view toggle button on the dashboard */
+        .view-toggle-btn {
+            padding: 8px 12px;
+            border: 1px solid #ccc;
+            background: #f0f0f0;
+            cursor: pointer;
+            transition: background-color 0.3s, color 0.3s;
+        }
+        .view-toggle-btn.active {
+            background-color: #69C99F;
+            color: #23403B;
+            font-weight: bold;
+            border-color: #69C99F;
+        }
+
+        /* 2. Style for variance cells in tables */
+        #expense-analysis-table td.positive,
+        #expense-analysis-table td.negative {
+            font-weight: bold;
+        }
+        #expense-analysis-table td.positive {
+            color: #28a745; /* Green text */
+            background-color: #f0fff4; /* Light green background */
+        }
+        #expense-analysis-table td.negative {
+            color: #d9534f; /* Red text (from your .delete-button style) */
+            background-color: #fff8f8; /* Light red background */
+        }
+
+        /* 3. Added styles for in-line edit buttons since they weren't in style.css */
+        .action-buttons .edit-button {
+            background-color: #6D9E89;
+            color: #fff;
+        }
+        .action-buttons .edit-button:hover {
+            background-color: #5a8273;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="header">
+        <div class="header-top">
+            <h1>Expense Tracker</h1>
+            <div class="header-actions">
+                <button id="btnLoadBudget">Load Budget (Plan)</button>
+                <button id="btnLoadSpending">Load Spending (Log)</button>
+                <button id="btnSaveSpending">Save Spending (Log)</button>
+            </div>
+        </div>
+        <input type="file" id="fileLoadBudget" accept=".json" style="display: none;">
+        <input type="file" id="fileLoadSpending" accept=".json" style="display: none;">
+    </header>
+
+    <nav class="main-nav">
+        <div class="tab-buttons-header">
+            <button class="tab-button active" data-tab="dashboard">Dashboard</button>
+            <button class="tab-button" data-tab="log-expense">Log Expense</button>
+            <button class="tab-button" data-tab="log-list">Expense Log</button>
+            <button class="tab-button" data-tab="overspend">Overspend</button> <button class="tab-button" data-tab="charts">Charts</button> </div>
+    </nav>
+
+    <div class="tab-container">
+
+        <div id="dashboard-tab" class="tab-content active">
+
+            <div class="dashboard-controls" style="padding: 15px; background: #f9f9f9; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+                <div id="date-navigator" style="margin-bottom: 15px;">
+                    <button id="btnPrevPeriod">&lt;&lt; Prev</button>
+                    <strong id="current-period-display" style="margin: 0 15px; font-size: 1.2em;"></strong>
+                    <button id="btnNextPeriod">Next &gt;&gt;</button>
+                </div>
+                <div id="view-toggles">
+                    <button class="view-toggle-btn" data-view="daily">Daily</button>
+                    <button class="view-toggle-btn active" data-view="weekly">Weekly</button>
+                    <button class="view-toggle-btn" data-view="monthly">Monthly</button>
+                    <button class="view-toggle-btn" data-view="yearly">Yearly</button>
+                </div>
+            </div>
+
+            <div id="expense-summary">
+                <h2>Period Summary</h2>
+                <div id="expense-summary-details">
+                    <div class="summary-card">
+                        <h3>Budgeted</h3>
+                        <p id="summary-budgeted">$0.00</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Actual</h3>
+                        <p id="summary-actual">$0.00</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Variance</h3>
+                        <p id="summary-variance" class="positive">$0.00</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="expense-analysis-container">
+                <h2>Expense Breakdown</h2>
+                <table id="expense-analysis-table">
+                    <thead>
+                        <tr>
+                            <th>Budget Item</th>
+                            <th>Budgeted</th>
+                            <th>Actual</th>
+                            <th>Variance</th>
+                        </tr>
+                    </thead>
+                    <tbody id="expense-breakdown-tbody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="log-expense-tab" class="tab-content">
+            <form class="expense-form" id="expense-entry-form">
+                <h2>Add New Expense</h2>
+
+                <label for="expense-date">Date</label>
+                <input type="date" id="expense-date" required>
+
+                <label for="expense-amount">Amount</label>
+                <input type="number" id="expense-amount" step="0.01" placeholder="e.g., 25.50" required>
+
+                <label for="expense-description">Description</label>
+                <input type="text" id="expense-description" placeholder="e.g., Weekly groceries" required>
+
+                <label for="expense-category-select">Budget Item</label>
+                <select id="expense-category-select" required>
+                    <option value="">-- Select Budget Item --</option>
+                </select>
+
+                <button type="submit">Add Expense</button>
+            </form>
+        </div>
+
+        <div id="log-list-tab" class="tab-content">
+            <div id="expense-table-container">
+                <h2>Full Expense Log</h2>
+                <table id="expense-table">
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Item</th>
+                            <th>Description</th>
+                            <th>Amount</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="full-expense-list-tbody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="overspend-tab" class="tab-content">
+            <div id="overspend-container">
+                <h2>Monthly Overspend Report</h2>
+                <table id="overspend-table" class="expense-table"> <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Budget Item</th>
+                            <th>Budgeted</th>
+                            <th>Spent</th>
+                            <th>Overspend</th>
+                        </tr>
+                    </thead>
+                    <tbody id="overspend-tbody">
+                        </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="charts-tab" class="tab-content">
+            <div id="expense-analysis-container"> <h2>Charts</h2>
+                <div class="chart-controls" style="padding: 15px; text-align: center;">
+                    <label for="chart-period-select" style="font-weight: bold; margin-right: 10px;">Select Period:</label>
+                    <select id="chart-period-select" style="padding: 8px; border-radius: 4px; border: 1px solid #ddd;">
+                        </select>
+                </div>
+                <div class="chart-container" style="position: relative; height: 50vh; width: 90%; margin: 20px auto;">
+                    <canvas id="expense-chart"></canvas>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
