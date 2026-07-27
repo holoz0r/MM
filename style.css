@@ -753,3 +753,170 @@ body {
     font-weight: bold;
     color: #d9534f;
 }
+/* ===================================================================
+   Additions: PDF import modal + Insights tab
+   Append this whole block to the end of your existing style.css
+   =================================================================== */
+
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-box {
+    background: #fff;
+    border-radius: 8px;
+    padding: 20px;
+    max-width: 95%;
+    width: 900px;
+    max-height: 85vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+}
+
+.modal-box h2 {
+    color: #23403B;
+    margin-top: 0;
+}
+
+.modal-table-wrap {
+    overflow: auto;
+    flex: 1;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+}
+
+.modal-table-wrap table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.modal-table-wrap th, .modal-table-wrap td {
+    border: 1px solid #ddd;
+    padding: 6px;
+    font-size: 0.9em;
+}
+
+.modal-table-wrap th {
+    background-color: #637A6C;
+    color: #f0f0f0;
+    position: sticky;
+    top: 0;
+}
+
+.modal-table-wrap input[type="text"],
+.modal-table-wrap input[type="number"],
+.modal-table-wrap input[type="date"],
+.modal-table-wrap select {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 4px;
+}
+
+.modal-actions {
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    margin-top: 15px;
+}
+
+.modal-actions button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+}
+
+.insights-section {
+    margin: 20px 0;
+    padding: 15px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 95%;
+    margin-left: auto;
+    margin-right: auto;
+    overflow-x: auto;
+}
+
+.insights-section h2 {
+    color: #23403B;
+    text-align: center;
+}
+
+#category-variance-table,
+#recurring-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 600px;
+}
+
+#category-variance-table th, #category-variance-table td,
+#recurring-table th, #recurring-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+
+#category-variance-table th, #recurring-table th {
+    background-color: #637A6C;
+    color: #f0f0f0;
+}
+
+.runway-inputs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.runway-inputs label {
+    font-weight: bold;
+    color: #555;
+}
+
+.runway-inputs input {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 160px;
+}
+
+.runway-grid {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.runway-grid > div {
+    flex: 1;
+    min-width: 220px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 15px;
+    text-align: center;
+}
+
+.runway-grid h4 {
+    margin-top: 0;
+    color: #555;
+}
+
+@media (max-width: 480px) {
+    .modal-box {
+        width: 100%;
+        padding: 12px;
+    }
+}

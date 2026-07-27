@@ -67,7 +67,8 @@
             <button class="tab-button active" data-tab="dashboard">Dashboard</button>
             <button class="tab-button" data-tab="log-expense">Log Expense</button>
             <button class="tab-button" data-tab="log-list">Expense Log</button>
-            <button class="tab-button" data-tab="overspend">Overspend</button> <button class="tab-button" data-tab="charts">Charts</button> </div>
+            <button class="tab-button" data-tab="overspend">Overspend</button> <button class="tab-button" data-tab="charts">Charts</button>
+            <button class="tab-button" data-tab="insights">Insights</button> </div>
     </nav>
 
     <div class="tab-container">
@@ -192,6 +193,68 @@
                 <div class="chart-container" style="position: relative; height: 50vh; width: 90%; margin: 20px auto;">
                     <canvas id="expense-chart"></canvas>
                 </div>
+            </div>
+        </div>
+
+        <div id="insights-tab" class="tab-content">
+            <div class="insights-section">
+                <h2>Where Tracking Is Actually Costing/Saving You Money</h2>
+                <p style="text-align:center; color:#555; max-width:700px; margin:0 auto 15px;">
+                    These figures compare your logged spending against your budget plan, averaged over full
+                    calendar months on file. Positive variance = you're spending more than planned in that
+                    category (a "leak"). Negative variance = headroom.
+                </p>
+                <table id="category-variance-table">
+                    <thead>
+                        <tr>
+                            <th>Budget Item</th>
+                            <th>Budgeted / mo</th>
+                            <th>Actual / mo (avg)</th>
+                            <th>Variance / mo</th>
+                            <th>Annualized Impact</th>
+                        </tr>
+                    </thead>
+                    <tbody id="category-variance-tbody"></tbody>
+                </table>
+            </div>
+
+            <div class="insights-section">
+                <h2>Recurring Commitments Detected</h2>
+                <p style="text-align:center; color:#555; max-width:700px; margin:0 auto 15px;">
+                    Charges with the same description showing up in 3+ different months &mdash; subscriptions,
+                    memberships, bills. These recur automatically every month whether you notice them or not,
+                    so trimming one has a compounding, ongoing effect (unlike a one-off purchase).
+                </p>
+                <table id="recurring-table">
+                    <thead>
+                        <tr>
+                            <th>Description</th>
+                            <th>Category</th>
+                            <th>Months Seen</th>
+                            <th>Avg Amount</th>
+                            <th>Annualized Cost</th>
+                        </tr>
+                    </thead>
+                    <tbody id="recurring-tbody"></tbody>
+                </table>
+                <p id="recurring-total-line" style="text-align:center; font-weight:bold; margin-top:10px;"></p>
+            </div>
+
+            <div class="insights-section">
+                <h2>Runway Impact Calculator</h2>
+                <p style="text-align:center; color:#555; max-width:700px; margin:0 auto 15px;">
+                    Enter your current net position (assets minus debts &mdash; see the Doomsday tab on the
+                    Budget Tracker page) and your total monthly income. This shows how your <em>actual</em>
+                    spending pattern (not your plan) is really affecting how long your money lasts.
+                    These two values are saved locally so you only need to enter them once.
+                </p>
+                <div class="runway-inputs">
+                    <label for="runway-net-position">Current Net Position ($)</label>
+                    <input type="number" id="runway-net-position" step="0.01" placeholder="e.g., 25886.22">
+                    <label for="runway-monthly-income">Total Monthly Income ($)</label>
+                    <input type="number" id="runway-monthly-income" step="0.01" placeholder="e.g., 4452.50">
+                </div>
+                <div id="runway-results" class="runway-results"></div>
             </div>
         </div>
 

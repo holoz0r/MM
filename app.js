@@ -45,9 +45,18 @@ document.addEventListener('DOMContentLoaded', () => {
     const chartPeriodSelect = document.getElementById('chart-period-select');
     const expenseChartCanvas = document.getElementById('expense-chart').getContext('2d');
 
+    // 8. Insights Tab
+    const categoryVarianceTbody = document.getElementById('category-variance-tbody');
+    const recurringTbody = document.getElementById('recurring-tbody');
+    const recurringTotalLine = document.getElementById('recurring-total-line');
+    const runwayNetPositionInput = document.getElementById('runway-net-position');
+    const runwayMonthlyIncomeInput = document.getElementById('runway-monthly-income');
+    const runwayResults = document.getElementById('runway-results');
+
     // --- INITIALIZATION ---
     expenseDateInput.valueAsDate = new Date(); // Set default date to today
     loadDataFromStorage(); // 5. Load from localStorage on startup
+    loadRunwayInputsFromStorage();
     updateDashboard();
 
     // --- 5. BROWSER STORAGE (SAVE) ---
@@ -57,6 +66,26 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function saveSpendingToStorage() {
         localStorage.setItem('userSpendingLog', JSON.stringify(actualExpenses));
+    }
+
+    function loadRunwayInputsFromStorage() {
+        const netPos = localStorage.getItem('runwayNetPosition');
+        const income = localStorage.getItem('runwayMonthlyIncome');
+        if (netPos !== null && runwayNetPositionInput) runwayNetPositionInput.value = netPos;
+        if (income !== null && runwayMonthlyIncomeInput) runwayMonthlyIncomeInput.value = income;
+    }
+
+    if (runwayNetPositionInput) {
+        runwayNetPositionInput.addEventListener('input', () => {
+            localStorage.setItem('runwayNetPosition', runwayNetPositionInput.value);
+            updateRunwayCalc();
+        });
+    }
+    if (runwayMonthlyIncomeInput) {
+        runwayMonthlyIncomeInput.addEventListener('input', () => {
+            localStorage.setItem('runwayMonthlyIncome', runwayMonthlyIncomeInput.value);
+            updateRunwayCalc();
+        });
     }
 
     // --- 5. BROWSER STORAGE (LOAD) ---
@@ -157,6 +186,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateOverspendReport(); // 6.
         populateChartPeriodSelector(); // 7.
         renderChart(); // 7.
+        updateInsightsTab(); // 8.
     }
 
     // --- TAB NAVIGATION ---
@@ -179,6 +209,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (targetTab === 'charts') {
                 populateChartPeriodSelector();
                 renderChart();
+            }
+            // 8. Update insights tab when clicked
+            if (targetTab === 'insights') {
+                updateInsightsTab();
             }
         });
     });
@@ -678,6 +712,207 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             }
         });
+    }
+
+    // =====================================================================
+    // --- 8. INSIGHTS TAB: category variance, recurring detection, runway ---
+    // =====================================================================
+
+    function normalizeDescription(str) {
+        return (str || '')
+            .toLowerCase()
+            .replace(/[^a-z\s]/g, ' ')   // strip digits/punctuation (store numbers, dates, etc.)
+            .replace(/\s+/g, ' ')
+            .trim();
+    }
+
+    /** Returns the sorted list of distinct "YYYY-MM" months present in actualExpenses,
+     *  excluding the current (likely partial) month so averages aren't skewed low. */
+    function getFullMonthsOnFile() {
+        const months = new Set();
+        actualExpenses.forEach(exp => {
+            months.add(`${exp.date.getFullYear()}-${(exp.date.getMonth() + 1).toString().padStart(2, '0')}`);
+        });
+        const sorted = [...months].sort();
+        const nowKey = `${new Date().getFullYear()}-${(new Date().getMonth() + 1).toString().padStart(2, '0')}`;
+        return sorted.filter(m => m !== nowKey);
+    }
+
+    function computeCategoryVariance() {
+        const fullMonths = getFullMonthsOnFile();
+        if (fullMonths.length === 0 || budgetExpenses.length === 0) return [];
+
+        const monthlyCatTotals = new Map(); // month -> category -> total
+        actualExpenses.forEach(exp => {
+            const key = `${exp.date.getFullYear()}-${(exp.date.getMonth() + 1).toString().padStart(2, '0')}`;
+            if (!fullMonths.includes(key)) return;
+            if (!monthlyCatTotals.has(key)) monthlyCatTotals.set(key, new Map());
+            const catMap = monthlyCatTotals.get(key);
+            catMap.set(exp.category, (catMap.get(exp.category) || 0) + exp.amount);
+        });
+
+        const allCategories = new Set(budgetExpenses.map(b => b.source));
+        monthlyCatTotals.forEach(catMap => catMap.forEach((_, cat) => allCategories.add(cat)));
+
+        const results = [];
+        allCategories.forEach(cat => {
+            const budgetItem = budgetExpenses.find(b => b.source === cat);
+            const budgetedMonthly = budgetItem ? (budgetItem.daily || 0) * 30.44 : 0;
+
+            let total = 0;
+            fullMonths.forEach(m => {
+                total += (monthlyCatTotals.get(m) || new Map()).get(cat) || 0;
+            });
+            const actualMonthly = total / fullMonths.length;
+            const variance = actualMonthly - budgetedMonthly;
+
+            results.push({ category: cat, budgetedMonthly, actualMonthly, variance, annualImpact: variance * 12 });
+        });
+
+        results.sort((a, b) => b.variance - a.variance);
+        return results;
+    }
+
+    function computeRecurringCharges() {
+        const groups = new Map(); // normalizedDescription -> { descriptions:Set, category, months:Set, total, count }
+        actualExpenses.forEach(exp => {
+            const key = normalizeDescription(exp.description);
+            if (!key) return;
+            const monthKey = `${exp.date.getFullYear()}-${(exp.date.getMonth() + 1).toString().padStart(2, '0')}`;
+            if (!groups.has(key)) {
+                groups.set(key, { label: exp.description, category: exp.category, months: new Set(), total: 0, count: 0 });
+            }
+            const g = groups.get(key);
+            g.months.add(monthKey);
+            g.total += exp.amount;
+            g.count += 1;
+        });
+
+        const recurring = [];
+        let recurringTotal = 0;
+        let oneOffTotal = 0;
+
+        groups.forEach(g => {
+            if (g.months.size >= 3) {
+                const avg = g.total / g.count;
+                const annualized = avg * 12; // treat as roughly monthly cadence
+                recurring.push({ label: g.label, category: g.category, monthsSeen: g.months.size, avgAmount: avg, annualized });
+                recurringTotal += annualized;
+            } else {
+                oneOffTotal += g.total;
+            }
+        });
+
+        recurring.sort((a, b) => b.annualized - a.annualized);
+        return { recurring, recurringTotal, oneOffTotal };
+    }
+
+    function updateInsightsTab() {
+        if (!categoryVarianceTbody) return;
+
+        // --- Category variance table ---
+        const variance = computeCategoryVariance();
+        if (variance.length === 0) {
+            categoryVarianceTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">Need at least one full calendar month of logged spending (and a loaded budget) to compute this.</td></tr>';
+        } else {
+            categoryVarianceTbody.innerHTML = variance.map(v => `
+                <tr>
+                    <td>${escapeHTML(v.category)}</td>
+                    <td>${formatCurrency(v.budgetedMonthly)}</td>
+                    <td>${formatCurrency(v.actualMonthly)}</td>
+                    <td class="${v.variance <= 0 ? 'positive' : 'negative'}">${formatCurrency(v.variance)}</td>
+                    <td class="${v.annualImpact <= 0 ? 'positive' : 'negative'}">${formatCurrency(v.annualImpact)}</td>
+                </tr>
+            `).join('');
+        }
+
+        // --- Recurring commitments table ---
+        const { recurring, recurringTotal, oneOffTotal } = computeRecurringCharges();
+        if (recurring.length === 0) {
+            recurringTbody.innerHTML = '<tr><td colspan="5" style="text-align:center;">No description has recurred in 3+ different months yet.</td></tr>';
+            recurringTotalLine.textContent = '';
+        } else {
+            recurringTbody.innerHTML = recurring.map(r => `
+                <tr>
+                    <td>${escapeHTML(r.label)}</td>
+                    <td>${escapeHTML(r.category)}</td>
+                    <td>${r.monthsSeen}</td>
+                    <td>${formatCurrency(r.avgAmount)}</td>
+                    <td>${formatCurrency(r.annualized)}</td>
+                </tr>
+            `).join('');
+            recurringTotalLine.textContent =
+                `Recurring commitments total roughly ${formatCurrency(recurringTotal)}/year. ` +
+                `Everything else (one-off / irregular purchases) totals ${formatCurrency(oneOffTotal)} over the period logged.`;
+        }
+
+        updateRunwayCalc();
+    }
+
+    function updateRunwayCalc() {
+        if (!runwayResults) return;
+
+        const netPosition = parseFloat(runwayNetPositionInput.value);
+        const monthlyIncome = parseFloat(runwayMonthlyIncomeInput.value);
+
+        if (isNaN(netPosition) || isNaN(monthlyIncome) || budgetExpenses.length === 0) {
+            runwayResults.innerHTML = '<p style="text-align:center; color:#888;">Enter your net position and monthly income above to see this.</p>';
+            return;
+        }
+
+        const monthlyBudgetTotal = budgetExpenses.reduce((sum, b) => sum + (b.daily || 0) * 30.44, 0);
+
+        const fullMonths = getFullMonthsOnFile();
+        let monthlyActualTotal = monthlyBudgetTotal; // fallback if no logged history yet
+        if (fullMonths.length > 0) {
+            const totalsByMonth = new Map();
+            actualExpenses.forEach(exp => {
+                const key = `${exp.date.getFullYear()}-${(exp.date.getMonth() + 1).toString().padStart(2, '0')}`;
+                if (!fullMonths.includes(key)) return;
+                totalsByMonth.set(key, (totalsByMonth.get(key) || 0) + exp.amount);
+            });
+            const sum = fullMonths.reduce((s, m) => s + (totalsByMonth.get(m) || 0), 0);
+            monthlyActualTotal = sum / fullMonths.length;
+        }
+
+        const dailyNetBudgeted = (monthlyIncome - monthlyBudgetTotal) / 30.44;
+        const dailyNetActual = (monthlyIncome - monthlyActualTotal) / 30.44;
+
+        const projectedDate = (dailyRate) => {
+            if (dailyRate >= 0) return null; // growing, not depleting
+            const days = netPosition / Math.abs(dailyRate);
+            const d = new Date(Date.now() + days * 24 * 60 * 60 * 1000);
+            return { days, date: d.toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) };
+        };
+
+        const budgetedProjection = projectedDate(dailyNetBudgeted);
+        const actualProjection = projectedDate(dailyNetActual);
+
+        let html = '<div class="runway-grid">';
+        html += `<div><h4>At your budgeted rate</h4><p>${dailyNetBudgeted >= 0
+            ? `Growing by ${formatCurrency(dailyNetBudgeted)}/day`
+            : `Depleting — projected zero on ${budgetedProjection.date} (${Math.round(budgetedProjection.days)} days)`}</p></div>`;
+        html += `<div><h4>At your actual logged rate</h4><p>${dailyNetActual >= 0
+            ? `Growing by ${formatCurrency(dailyNetActual)}/day`
+            : `Depleting — projected zero on ${actualProjection.date} (${Math.round(actualProjection.days)} days)`}</p></div>`;
+        html += '</div>';
+
+        if (dailyNetBudgeted >= 0 && dailyNetActual < 0) {
+            html += `<p class="negative" style="text-align:center; font-weight:bold;">
+                Your plan is sustainable, but your actual spending is not — at this rate you flip from
+                building wealth to burning through savings. Closing this gap is worth
+                ${formatCurrency((dailyNetBudgeted - dailyNetActual) * 30.44)}/month.</p>`;
+        } else if (dailyNetActual < dailyNetBudgeted) {
+            const daysDiff = actualProjection && budgetedProjection ? Math.round(actualProjection.days) - Math.round(budgetedProjection.days) : null;
+            html += `<p class="negative" style="text-align:center; font-weight:bold;">
+                Sticking to your budget instead of your current actual pace is worth
+                ${formatCurrency((dailyNetBudgeted - dailyNetActual) * 30.44)}/month
+                ${daysDiff !== null ? `— roughly ${Math.abs(daysDiff)} extra days of runway.` : ''}</p>`;
+        } else {
+            html += `<p class="positive" style="text-align:center; font-weight:bold;">You're currently spending less than planned — nice work.</p>`;
+        }
+
+        runwayResults.innerHTML = html;
     }
 
     // --- UTILITY FUNCTIONS ---
