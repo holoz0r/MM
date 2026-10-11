@@ -920,3 +920,212 @@ body {
         padding: 12px;
     }
 }
+/* ===================================================================
+   Additions: Goals tab
+   Append this whole block to the end of your existing style.css
+   =================================================================== */
+
+.goals-header {
+    max-width: 95%;
+    margin: 0 auto 20px;
+    text-align: center;
+}
+
+.goals-header h2 {
+    color: #23403B;
+}
+
+.goals-header p {
+    color: #555;
+    max-width: 700px;
+    margin: 0 auto 15px;
+}
+
+.goals-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+}
+
+#goal-input-container {
+    margin: 20px auto;
+    padding: 20px;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    max-width: 95%;
+}
+
+#goal-input-container h2 {
+    color: #23403B;
+    margin-top: 0;
+    margin-bottom: 15px;
+    text-align: center;
+}
+
+#goal-input-container label {
+    display: block;
+    margin-bottom: 8px;
+    color: #555;
+    font-weight: bold;
+}
+
+#goal-input-container input[type="text"],
+#goal-input-container input[type="number"],
+#goal-input-container input[type="date"] {
+    width: calc(100% - 16px);
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+#goal-input-container button {
+    background-color: #69C99F;
+    color: #23403B;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 1em;
+    transition: background-color 0.3s ease;
+    display: block;
+    width: 100%;
+    margin-top: 10px;
+}
+
+#goal-input-container button:hover {
+    background-color: #6D9E89;
+}
+
+#goal-input-container select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+.goal-amount-fields {
+    background: #f9f9f9;
+    border: 1px solid #eee;
+    border-radius: 6px;
+    padding: 12px;
+    margin-bottom: 15px;
+}
+
+.goal-buffer-hint {
+    color: #555;
+    font-size: 0.9em;
+    margin: 8px 0 0;
+}
+
+.goal-amount-live {
+    color: #777;
+    font-size: 0.85em;
+    font-weight: normal;
+}
+
+#goals-table-container {
+    margin: 20px auto;
+    border-radius: 8px;
+    background-color: #fff;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    overflow-x: auto;
+    max-width: 95%;
+}
+
+#goals-table-container h2 {
+    color: #23403B;
+    padding: 15px;
+    margin-top: 0;
+    text-align: center;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #eee;
+}
+
+#goals-table {
+    width: 100%;
+    border-collapse: collapse;
+    min-width: 700px;
+}
+
+#goals-table th, #goals-table td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+    vertical-align: middle;
+}
+
+#goals-table th {
+    background-color: #637A6C;
+    color: #f0f0f0;
+    font-weight: bold;
+}
+
+#goals-table tbody tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+.priority-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    justify-content: center;
+}
+
+.priority-btn {
+    background-color: #ddd;
+    border: none;
+    border-radius: 4px;
+    padding: 2px 6px;
+    cursor: pointer;
+    font-size: 0.8em;
+}
+
+.priority-btn:hover:not(:disabled) {
+    background-color: #ccc;
+}
+
+.priority-btn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.progress-bar-track {
+    width: 100%;
+    min-width: 100px;
+    height: 14px;
+    background-color: #eee;
+    border-radius: 7px;
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    background-color: #69C99F;
+    transition: width 0.3s ease;
+}
+
+.progress-label {
+    display: inline-block;
+    margin-left: 8px;
+    font-size: 0.85em;
+    color: #555;
+}
+
+@media (max-width: 768px) {
+    #goal-input-container,
+    #goals-table-container,
+    .goals-header {
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+}

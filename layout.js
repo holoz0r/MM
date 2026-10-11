@@ -34,6 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof renderHeaderCalculations === 'function') renderHeaderCalculations();
         } else if (tabId === 'countdown') {
             if (typeof renderCountdownData === 'function') renderCountdownData();
+        } else if (tabId === 'goals') {
+            if (typeof renderGoalsTable === 'function') renderGoalsTable();
         }
 
         // If loading data, switch to the 'view' tab

@@ -2,7 +2,8 @@ function saveData() {
     const allData = {
         accounts: accounts,
         income: incomeEntries,
-        expenses: expenseEntries
+        expenses: expenseEntries,
+        goals: goals
     };
 
     const jsonData = JSON.stringify(allData);
@@ -61,6 +62,20 @@ function loadData() {
                             alert('Error loading expense data. Please ensure the application scripts are loaded correctly.');
                             loadSuccessful = false;
                         }
+                    }
+
+                    // "goals" is a newer, optional key — older budget_data.json files simply
+                    // won't have it, so we default to an empty list rather than failing.
+                    // normalizeGoal migrates goals saved under the earlier absolute-target
+                    // model (no amountType) into the current fixed/bufferMonths shape.
+                    goals = loadedData.goals || [];
+                    if (typeof normalizeGoal === 'function') {
+                        goals = goals.map(normalizeGoal);
+                    }
+                    if (typeof renderGoalsTable === 'function') {
+                        renderGoalsTable();
+                    } else {
+                        console.error('Error: renderGoalsTable is not defined when loading goals.');
                     }
 
                     // Call all rendering and calculation functions after loading data

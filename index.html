@@ -21,6 +21,7 @@
                 <button class="tab-button" data-tab="view">View & Edit</button>
                 <button class="tab-button" data-tab="insights">Insights</button>
                 <button class="tab-button" data-tab="countdown">Doomsday</button>
+                <button class="tab-button" data-tab="goals">Goals</button>
             </div>
         </nav>
     </header>
@@ -345,14 +346,89 @@
                 
             </div>
         </div>
+
+        <div id="goals" class="tab-content">
+            <div class="goals-header">
+                <h2>Financial Goals</h2>
+                <p>
+                    Each goal is an amount <em>on top of</em> whatever comes before it in priority order &mdash;
+                    you don't need to work out the running total yourself. Your full monthly surplus goes toward
+                    closing goal #1's amount first; once it's covered, that same surplus rolls on to goal #2,
+                    and so on. Reorder with the arrows to change what stacks on what.
+                </p>
+                <div class="goals-summary">
+                    <div class="summary-card">
+                        <h3>Current Net Position</h3>
+                        <p id="goals-current-net-position">$0.00</p>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Monthly Surplus</h3>
+                        <p id="goals-monthly-surplus">$0.00</p>
+                    </div>
+                </div>
+            </div>
+
+            <div id="goal-input-container">
+                <h2>Add Goal</h2>
+                <label for="goal-name">Goal Name:</label>
+                <input type="text" id="goal-name" placeholder="e.g., New Phones"><br>
+
+                <label for="goal-amount-type">Amount Type:</label>
+                <select id="goal-amount-type" onchange="showGoalAmountFields()">
+                    <option value="fixed">Fixed Dollar Amount</option>
+                    <option value="bufferMonths">Months of Budgeted Expenses (buffer)</option>
+                </select>
+
+                <div id="goal-fixed-fields" class="goal-amount-fields">
+                    <label for="goal-fixed-amount">Amount ($):</label>
+                    <input type="number" step="0.01" id="goal-fixed-amount" placeholder="e.g., 4000">
+                </div>
+
+                <div id="goal-buffer-fields" class="goal-amount-fields" style="display:none;">
+                    <label for="goal-buffer-months">Number of Months:</label>
+                    <input type="number" step="0.1" id="goal-buffer-months" placeholder="e.g., 6" oninput="updateGoalBufferPreview()">
+                    <p class="goal-buffer-hint">
+                        Right now that's <strong id="goal-buffer-preview">$0.00</strong> of your budgeted monthly
+                        expenses. This stays live &mdash; if your budget changes later, this goal's amount updates
+                        with it automatically.
+                    </p>
+                </div>
+
+                <label for="goal-target-date">Target Date (optional):</label>
+                <input type="date" id="goal-target-date"><br>
+                <button type="button" onclick="addGoal()">Add Goal</button>
+            </div>
+
+            <div id="goals-table-container">
+                <h2>Goals (priority order)</h2>
+                <table id="goals-table">
+                    <thead>
+                        <tr>
+                            <th>Priority</th>
+                            <th>Goal</th>
+                            <th>Amount</th>
+                            <th>Cumulative Target</th>
+                            <th>Target Date</th>
+                            <th>Progress</th>
+                            <th>Projected</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="goals-table-body">
+                        </tbody>
+                </table>
+            </div>
+        </div>
     </main>
 
     <script src="income.js"></script>
     <script src="expenses.js"></script>
     <script src="accounts.js"></script>
     <script src="analyse.js"></script>
-    <script src="layout.js"></script>
     <script src="countdown.js"></script>
+    <script src="goals.js"></script>
+    <script src="layout.js"></script>
     <script src="io.js"></script>
     
 </body>
