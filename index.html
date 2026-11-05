@@ -1,435 +1,336 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Budget Tracker</title>
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-    <header class="header">
-        <div class="header-top">
-            <h1>Budget Tracker</h1> | <h1><a href="expenses.html">Switch to expenses</a></h1>
-            <div class="header-actions">
-                <button onclick="saveData()">Save</button>
-                <button onclick="loadData()">Load</button>
-            </div>
-        </div>
-        <nav class="main-nav">
-            <div class="tab-buttons-header">
-                <button class="tab-button active" data-tab="input">Input</button>
-                <button class="tab-button" data-tab="view">View & Edit</button>
-                <button class="tab-button" data-tab="insights">Insights</button>
-                <button class="tab-button" data-tab="countdown">Doomsday</button>
-                <button class="tab-button" data-tab="goals">Goals</button>
-            </div>
-        </nav>
-    </header>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Budget Hub</title>
+<style>
+:root{--d:#23403B;--g:#69C99F;--m:#6D9E89;--t:#637A6C;--r:#d9534f}
+*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,sans-serif;background:#f4f4f4;color:#333}
+header{background:var(--d);color:#f0f0f0;padding:12px 20px;position:sticky;top:0;z-index:9;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+h1{margin:0;font-size:1.3em}button,select,input{font:inherit}
+.btn{background:var(--g);color:var(--d);border:0;padding:7px 12px;border-radius:5px;cursor:pointer}.btn:hover{background:var(--m)}
+.btn.x{background:#eee;color:#555;padding:2px 8px;font-size:.85em}
+nav{background:#fff;border-bottom:1px solid #ccc;display:flex;gap:6px;padding:0 15px;flex-wrap:wrap}
+nav button{background:none;border:0;padding:10px 14px;cursor:pointer;color:#555;border-bottom:3px solid transparent}
+nav button.on{color:var(--d);font-weight:700;border-color:var(--d)}
+main{max-width:1300px;margin:0 auto;padding:16px}.tab{display:none}.tab.on{display:block}
+.card{background:#fff;border-radius:10px;box-shadow:0 2px 5px #0001;padding:14px;margin-bottom:16px}
+h2{margin:0 0 10px;color:var(--d);font-size:1.15em}
+.stats{display:flex;gap:12px;flex-wrap:wrap}.stat{flex:1;min-width:130px;background:#f9f9f9;border:1px solid #ddd;border-radius:8px;padding:10px;text-align:center}
+.stat b{display:block;font-size:1.25em;color:var(--d)}.pos{color:#28a745!important}.neg{color:var(--r)!important}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px;align-items:start}
+.bk{border-top:5px solid var(--c);background:#fff;border-radius:10px;box-shadow:0 2px 5px #0001;padding:12px}.bk.un{background:#fffaf0}
+.bk h3{margin:0;display:flex;justify-content:space-between;gap:8px;font-size:1.05em}.sub{color:#777;font-size:.85em;margin-bottom:6px}
+.row{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 0;border-top:1px solid #eee;font-size:.92em}
+.row select{max-width:140px;font-size:.85em}
+.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border-left:5px solid var(--c);background:#fff;padding:6px 10px;border-radius:6px;box-shadow:0 1px 3px #0002}
+table{width:100%;border-collapse:collapse}th,td{padding:6px 8px;border-bottom:1px solid #eee;text-align:left;white-space:nowrap}th{background:var(--t);color:#fff}
+td input,td select{width:100%;min-width:70px;padding:4px}.sc{overflow-x:auto;max-height:520px}
+form.f{display:flex;gap:8px;flex-wrap:wrap;align-items:end}form.f label{display:flex;flex-direction:column;font-size:.8em;color:#555}
+#dirty{background:var(--r);padding:2px 8px;border-radius:10px;font-size:.8em;display:none}
+.btn.x.on{background:var(--g);color:var(--d);font-weight:700}
+.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}td.pos,td.neg{font-weight:700}td.pos{background:#f0fff4}td.neg{background:#fff8f8}
+</style><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7"></script></head><body>
+<header><h1>Budget Hub <span id="dirty">unsaved changes</span></h1>
+<div><button class="btn" id="lb">Load file(s)</button> <button class="btn" id="sb">Save</button> <button class="btn x" id="sl">Export legacy files</button> <label style="font-size:.8em"><input type="checkbox" id="abk"> Auto backup</label></div></header>
+<nav><button class="on" data-tab="alloc">Allocation</button><button data-tab="budget">Budget</button><button data-tab="insights">Insights</button><button data-tab="doom">Doomsday</button><button data-tab="goals">Goals</button><button data-tab="bills">Bills</button><button data-tab="spend">Spending</button><button data-tab="chk">Budget check</button><button data-tab="charts">Charts</button></nav>
+<main>
+<div class="card" id="empty" style="display:none"><b>No data loaded.</b> Nothing is stored in your browser, so use <b>Load file(s)</b> to open your saved JSON: the combined file, or your old budget_data.json and spending_data.json together.</div>
+<section class="tab on" id="alloc">
+ <div class="card"><div class="stats"><label class="stat">Pay cycle<select id="cyc"><option>weekly</option><option>fortnightly</option><option selected>monthly</option></select></label>
+ <div class="stat">Income<b id="s1"></b></div><div class="stat">Allocated<b id="s2"></b></div><div class="stat">Unallocated<b id="s3"></b></div><div class="stat">Left over<b id="s4"></b></div></div></div>
+ <div class="card"><h2>Transfers by bank (per cycle)</h2><div class="chips" id="banks"></div></div>
+ <div class="grid" id="bks"></div>
+ <div class="card" style="margin-top:16px"><h2>New bucket</h2><form class="f" id="bf"><label>Name<input id="bn" required></label><label>Bank<input id="bb" list="bl"></label><datalist id="bl"></datalist><label>Linked account (optional)<select id="ba"></select></label><button class="btn">Add bucket</button></form></div>
+ <div class="card" style="margin-top:16px"><h2>Bucket health check</h2><small>"Should hold" is what each bucket should have accrued since its bills were last paid (from the spending log), capped at one payment per bill. Compared with the linked account balance. Buckets sharing an account are combined.</small><div class="sc" id="bh"></div></div>
+</section>
+<section class="tab" id="budget">
+ <div class="card"><h2>Accounts</h2><div class="sc"><table id="acc"></table></div><form class="f" id="af"><label>Type<select id="at"><option value="everyday">Everyday</option><option value="credit">Credit card</option><option value="offset">Offset</option><option value="mortgage">Mortgage</option><option value="upcoming">Upcoming expense</option></select></label><label>Name<input id="an" required></label><label>Bank<input id="ab" required></label><label><span id="l1">Balance</span><input id="a1" type="number" step="0.01" required></label><label id="w2" style="display:none">Credit limit<input id="a2" type="number" step="0.01"></label><label id="w3">Interest rate (%)<input id="a3" type="number" step="0.01"></label><label id="w4" style="display:none">Due date<input id="a4" type="date"></label><button class="btn">Add account</button></form><small>Mortgage and liability balances are entered as negatives, as in your existing data.</small></div>
+ <div class="card"><h2>Income</h2><div class="sc"><table id="inc"></table></div><form class="f" id="nf"><label>Source<input id="ns" required></label><label>Amount<input id="na" type="number" step="0.01" required></label><label>Frequency<select id="nq" class="fq"></select></label><button class="btn">Add income</button></form></div>
+ <div class="card"><h2>Expenses</h2><div class="sc"><table id="exp"></table></div><form class="f" id="ef"><label>Description<input id="es" required></label><label>Category<input id="ec" required></label><label>Amount<input id="ea" type="number" step="0.01" required></label><label>Frequency<select id="eq" class="fq"></select></label><button class="btn">Add expense</button></form></div>
+</section>
+<section class="tab" id="insights"><div class="card"><h2>Income summary</h2><div class="stats" id="i1"></div></div><div class="card"><h2>Expense summary</h2><div class="stats" id="i2"></div></div><div class="card"><h2>Net position</h2><div class="stats" id="i3"></div></div><div class="card"><h2>Expense analysis</h2><div class="sc" id="i4"></div></div><div class="card"><h2>Expense analysis by category</h2><div class="sc" id="i5"></div></div><div class="card"><h2>Annual spending by category <select id="pv1"><option value="cat">Budget category</option><option value="item">Budget item</option></select> <select id="pv2"><option value="cal">Calendar year</option><option value="fy">Financial year (Jul–Jun)</option></select></h2><small id="pvn"></small><div class="sc" id="pv"></div></div><div class="card"><h2>Spendable amount by expense</h2><label><input type="checkbox" id="ded"> Deduct goal targets first</label><p id="i6h"></p><div class="sc" id="i6"></div></div><div class="card"><h2>Spendable amount by category</h2><div class="sc" id="i7"></div></div></section>
+<section class="tab" id="doom"><div class="card"><h2>Doomsday: runway with no new income</h2><div id="dm"></div></div></section>
+<section class="tab" id="goals"><div class="card"><h2>Goals</h2><small>Goals are funded in priority order from your net position (assets minus liabilities), as on the Doomsday tab. Each goal's target is added to those above it.</small><div class="stats" id="gs" style="margin:12px 0"></div><div class="sc"><table id="gt"></table></div></div>
+<div class="card"><h2>New goal</h2><form class="f" id="gf"><label>Name<input id="gn" required></label><label>Type<select id="gy"><option value="fixed">Fixed amount</option><option value="bufferMonths">Months of expenses</option></select></label><label><span id="gl">Amount</span><input id="ga" type="number" step="0.01" required></label><label>Target date<input id="gd" type="date"></label><button class="btn">Add goal</button></form></div></section>
+<section class="tab" id="bills"><div class="card"><h2>Bills coming up <select id="bw"><option value="30">Next 30 days</option><option value="60" selected>Next 60 days</option><option value="90">Next 90 days</option></select></h2><small>Due dates are inferred from your last payment in the spending log plus the bill's frequency. Set a date to override it; once you log a later payment, the inferred date takes over again.</small><h3>Cover check (balances before upcoming transfers)</h3><div class="sc" id="bcv"></div></div><div class="card"><h2>All bills</h2><div class="sc" id="blt"></div></div></section>
+<section class="tab" id="chk"><div class="card"><h2>Budget reality check</h2><label>Months of history <input id="ckm" type="number" min="1" value="12" style="width:80px;padding:4px"></label> <label><input type="checkbox" id="cka"> All history</label><br><small id="cknote"></small><div class="sc" id="ck"></div></div></section>
+<section class="tab" id="spend">
+ <div class="card"><h2>Log expense</h2><form class="f" id="sf"><label>Date<input id="sd" type="date" required></label><label>Amount<input id="sa" type="number" step="0.01" required></label><label>Description<input id="sn" required></label><label>Budget item<select id="sc" required></select></label><button class="btn">Add expense</button></form></div>
+ <div class="card"><h2>Budget vs actual</h2><div class="stats" id="sm"></div><div style="text-align:center;margin:12px 0"><button class="btn x" data-nav="-1">&lt;&lt; Prev</button> <b id="pd"></b> <button class="btn x" data-nav="1">Next &gt;&gt;</button><div style="margin-top:8px"><button class="btn x" data-v="daily">Daily</button> <button class="btn x" data-v="weekly">Weekly</button> <button class="btn x" data-v="monthly">Monthly</button> <button class="btn x" data-v="yearly">Yearly</button></div></div><div class="sc"><table id="va"></table></div></div>
+ <div class="card"><h2>Overspend by month</h2><div class="sc"><table id="os"></table></div></div>
+ <div class="card"><h2>Monthly spending by category <select id="my"></select> <select id="mr"><option value="cat">Budget category</option><option value="item">Budget item</option></select></h2><small>Shading shows relative size. Future-dated entries are excluded.</small><div class="sc" id="mt"></div></div>
+ <div class="card"><h2>Expense log</h2><div class="sc"><table id="lg"></table></div></div>
+</section>
+<section class="tab" id="charts"><div class="card"><h2>Budget vs actual chart <select id="cp"></select></h2><div id="cm"></div><div style="position:relative;height:50vh"><canvas id="cv"></canvas></div></div>
+<div class="card"><h2>Year on year <select id="ya"></select> vs <select id="yb"></select></h2><div style="position:relative;height:50vh"><canvas id="yc"></canvas></div><div class="sc" id="yt" style="margin-top:12px"></div></div></section>
+</main>
+<script>
+const $=s=>document.querySelector(s),K=['daily','weekly','fortnightly','monthly','quarterly','yearly'],N={weekly:52,fortnightly:26,monthly:12};
+const $f=n=>new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD'}).format(n||0);
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let B={accounts:[],income:[],expenses:[]},S=[],cycle='monthly';
+// Same conversion maths as the existing budget app so stored values stay identical
+function conv(a,f){const m={daily:[a,a*7,a*14,a*365.25/12,a*365.25/4,a*365.25],weekly:[a/7,a,a*2,a*52/12,a*13,a*52],fortnightly:[a/14,a/2,a,a*52/24,a*6.5,a*26],monthly:[a/(365.25/12),a/(52/12),a/(52/24),a,a*3,a*12],quarterly:[a/(365.25/4),a/13,a/6.5,a/3,a,a*4],yearly:[a/365.25,a/52,a/26,a/12,a/4,a]}[f];return m?Object.fromEntries(K.map((k,i)=>[k,m[i]])):{}}
+const cy=x=>x[cycle]??(x.yearly||0)/N[cycle];
+const col=b=>{let h=0;for(const c of b||'')h=(h*31+c.charCodeAt(0))%360;return`hsl(${h} 55% 42%)`};
+const fq=s=>K.map(k=>`<option ${k==s?'selected':''}>${k}</option>`).join('');
+function norm(){B.accounts=B.accounts||[];B.income=B.income||[];B.expenses=B.expenses||[];B.buckets=B.buckets||[]}
+function persist(){$('#dirty').style.display='inline';draw()}
+function clean(){$('#dirty').style.display='none'}
+function dl(name,txt,keep){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;a.click();URL.revokeObjectURL(a.href);if(!keep)clean()}
 
-    <main>
-        <div id="input" class="tab-content active">
-            <div id="account-input-container">
-                <h2>Add Account</h2>
-                <label for="account-type">Account Type:</label>
-                <select id="account-type" onchange="showAccountForm()">
-                    <option value="">Select Account Type</option>
-                    <option value="everyday">Everyday</option>
-                    <option value="credit">Credit Card</option>
-                    <option value="offset">Offset</option>
-                    <option value="mortgage">Mortgage</option>
-                </select>
+const sortS=()=>S.sort((a,b)=>new Date(b.date)-new Date(a.date));
+$('#lb').onclick=pickMany;
 
-                <div id="everyday-form" class="account-form" style="display:none;">
-                    <h3>Everyday Account</h3>
-                    <label for="everyday-name">Name:</label>
-                    <input type="text" id="everyday-name"><br>
-                    <label for="everyday-bank">Bank:</label>
-                    <input type="text" id="everyday-bank"><br>
-                    <label for="everyday-balance">Balance:</label>
-                    <input type="number" id="everyday-balance"><br>
-                    <label for="everyday-interest-rate">Interest Rate (%):</label>
-                    <input type="number" step="0.01" id="everyday-interest-rate"><br>
-                    <button type="button" onclick="addEverydayAccount()">Add Everyday Account</button>
-                </div>
+$('#sb').onclick=()=>{if(!loaded&&!B.expenses.length&&!S.length&&!confirm('Nothing is loaded. Save an empty file?'))return;sv('budget_hub_data',pack())};
+$('#sl').onclick=()=>{dl('budget_data.json',JSON.stringify(B),1);setTimeout(()=>dl('spending_data.json',JSON.stringify(S,null,2),1),600)};
 
-                <div id="credit-form" class="account-form" style="display:none;">
-                    <h3>Credit Card Account</h3>
-                    <label for="credit-name">Name:</label>
-                    <input type="text" id="credit-name"><br>
-                    <label for="credit-bank">Bank:</label>
-                    <input type="text" id="credit-bank"><br>
-                    <label for="credit-available-balance">Available Balance:</label>
-                    <input type="number" id="credit-available-balance"><br>
-                    <label for="credit-limit">Credit Limit:</label>
-                    <input type="number" id="credit-limit"><br>
-                    <label for="credit-interest-rate">Interest Rate (%):</label>
-                    <input type="number" step="0.01" id="credit-interest-rate"><br>
-                    <button type="button" onclick="addCreditAccount()">Add Credit Card</button>
-                </div>
+// ---------- Allocation ----------
+function rAlloc(){
+ const bs=B.buckets,g=new Map([['',[]],...bs.map(b=>[b.name,[]])]);
+ B.expenses.forEach((e,i)=>g.get(g.has(e.bucket)?e.bucket:'').push(i));
+ const sum=a=>a.reduce((s,i)=>s+cy(B.expenses[i]),0),inc=B.income.reduce((s,i)=>s+(i[cycle]||0),0),tot=B.expenses.reduce((s,e)=>s+cy(e),0),un=sum(g.get(''));
+ $('#s1').textContent=$f(inc);$('#s2').textContent=$f(tot-un);$('#s3').textContent=$f(un);
+ const left=inc-tot;$('#s4').textContent=$f(left);$('#s4').className=left>=0?'pos':'neg';$('#s3').className=un?'neg':'pos';
+ const opts=sel=>'<option value="">Unallocated</option>'+bs.map(b=>`<option value="${esc(b.name)}" ${b.name===sel?'selected':''}>${esc(b.name)} (${esc(b.bank)})</option>`).join('');
+ const card=(n,b)=>{const ids=g.get(n).sort((x,y)=>cy(B.expenses[y])-cy(B.expenses[x])),t=sum(ids),a=b&&b.account&&B.accounts.find(x=>x.name===b.account&&isAsset(x));
+  return`<div class="bk ${b?'':'un'}" style="--c:${b?col(b.bank):'#999'}"><h3><span>${b?esc(b.name):'Unallocated'}</span><span>${$f(t)}</span></h3><div class="sub">${b?esc(b.bank)+(a?`, ${esc(a.name)} holds ${$f(a.balance)}${t?` (${(a.balance/t).toFixed(1)} cycles of cover)`:''}`:''):'Give these a bucket'}</div>`+
+  ids.map(i=>{const e=B.expenses[i];return`<div class="row"><span>${esc(e.source)}<br><small>${$f(cy(e))}</small></span><select data-a="${i}">${opts(n)}</select></div>`}).join('')+
+  (b?`<div style="margin-top:8px"><button class="btn x" data-ren="${esc(n)}">Rename</button> <button class="btn x" data-delb="${esc(n)}">Delete</button></div>`:'')+'</div>'};
+ $('#bks').innerHTML=(un||!bs.length?card('',null):'')+bs.map(b=>card(b.name,b)).join('');
+ const bk=new Map();bs.forEach(b=>bk.set(b.bank||'No bank',(bk.get(b.bank||'No bank')||0)+sum(g.get(b.name))));
+ $('#banks').innerHTML=[...bk].map(([k,v])=>`<div class="chip" style="--c:${col(k)}"><b>${esc(k)}</b><br>${$f(v)}</div>`).join('')||'Add a bucket to start.';
+ const banks=[...new Set([...B.accounts.map(a=>a.bank),...bs.map(b=>b.bank)].filter(Boolean))];
+ $('#bl').innerHTML=banks.map(b=>`<option value="${esc(b)}">`).join('');
+ $('#ba').innerHTML='<option value="">None</option>'+B.accounts.filter(a=>isAsset(a)).map(a=>`<option value="${esc(a.name)}">${esc(a.name)}, ${esc(a.bank)}</option>`).join('');
+}
+// ---------- Budget ----------
+function rBudget(){
+ $('#acc').innerHTML='<tr><th>Order</th><th>Name</th><th>Bank / paid from</th><th>Type</th><th>Balance / available / amount</th><th>Limit</th><th>Rate %</th><th>Due date</th><th></th></tr>'+B.accounts.map((a,i)=>{const up=a.type=='upcoming',k=a.type=='credit'?'availableBalance':'balance',I=(f,x,v)=>`<input ${x?'':'type="number" step="0.01"'} data-t="acc" data-i="${i}" data-k="${f}" value="${esc(v??a[f]??'')}">`;return`<tr><td><button class="btn x" data-ma="${i}:-1" ${i?'':'disabled'}>▲</button><button class="btn x" data-ma="${i}:1" ${i<B.accounts.length-1?'':'disabled'}>▼</button></td><td>${I('name',1)}</td><td>${I('bank',1)}</td><td>${up?'upcoming expense':a.type}</td><td>${up?I('upAmt',0,Math.abs(a.balance||0)):I(k)}</td><td>${a.type=='credit'?I('limit'):''}</td><td>${a.type=='offset'||up?'':I('interestRate')}</td><td>${up?I('dueDate',1,a.dueDate||'').replace('<input ','<input type="date" '):''}</td><td><button class="btn x" data-dx="acc:${i}">Delete</button></td></tr>`}).join('');
+ const ed=(t,x,i,extra)=>`<td><input data-t="${t}" data-i="${i}" data-k="source" value="${esc(x.source)}"></td>${extra}<td><input type="number" step="0.01" data-t="${t}" data-i="${i}" data-k="amount" value="${x.amount}"></td><td><select data-t="${t}" data-i="${i}" data-k="frequency">${fq(x.frequency)}</select></td>`;
+ $('#inc').innerHTML='<tr><th>Source</th><th>Amount</th><th>Frequency</th><th></th></tr>'+B.income.map((x,i)=>`<tr>${ed('inc',x,i,'')}<td><button class="btn x" data-dx="inc:${i}">Delete</button></td></tr>`).join('');
+ $('#exp').innerHTML='<tr><th>Description</th><th>Category</th><th>Amount</th><th>Frequency</th><th>Bucket</th><th>Recurring bill</th><th></th></tr>'+B.expenses.map((x,i)=>`<tr>${ed('exp',x,i,`<td><input data-t="exp" data-i="${i}" data-k="category" value="${esc(x.category)}"></td>`)}<td>${esc(x.bucket||'')}</td><td style="text-align:center"><input type="checkbox" style="width:auto;min-width:0" data-t="exp" data-i="${i}" data-k="bill" ${x.bill===false?'':'checked'}></td><td><button class="btn x" data-dx="exp:${i}">Delete</button></td></tr>`).join('');
+}
+// ---------- Doomsday ----------
+function rDoom(){
+ const as=B.accounts.filter(a=>isAsset(a)).reduce((s,a)=>s+(+a.balance||0),0),
+ owe=liab,
+ li=B.accounts.reduce((s,a)=>s+owe(a),0),net=as-li,
+ U=[['Years','yearly','year'],['Months','monthly','month'],['Fortnights','fortnightly','fortnight'],['Weeks','weekly','week'],['Days','daily','day'],['Hours','hourly','hour']],
+ tot=k=>B.expenses.reduce((s,e)=>s+(k=='hourly'?(e.daily||0)/24:(e[k]||0)),0),dy=tot('daily'),
+ lines=v=>U.map(([u,k,s])=>{const x=tot(k);return`<div>${x?(v/x).toFixed(2):'∞'} ${u} left at ${$f(x)} per ${s}</div>`}).join(''),
+ date=v=>dy>0&&v>0?new Date(Date.now()+v/dy*864e5).toLocaleDateString('en-AU',{dateStyle:'long'}):'N/A',
+ st=(l,v,c)=>`<div class="stat">${l}<b class="${c||''}">${v}</b></div>`,
+ blk=(t,v)=>`<div class="card" style="margin:0"><h2>${t}</h2>${lines(v)}<p>Projected date of no funds<br><b class="neg">${date(v)}</b></p></div>`,
+ tb=(h,rows)=>`<div class="card" style="margin:0"><h2>${h[0]}</h2><table><tr><th>Account</th><th>${h[1]}</th></tr>${rows.map(r=>`<tr><td>${esc(r[0])}</td><td>${$f(r[1])}</td></tr>`).join('')||'<tr><td colspan="2">None</td></tr>'}</table></div>`;
+ $('#dm').innerHTML=`<div class="stats">${st('Total assets',$f(as))+st('Total liabilities',$f(li))+st('Overall position',$f(net),net<0?'neg':'pos')}</div><div class="g2" style="margin-top:14px">${blk('Time until no money (net)',net)+blk('Time until no money (assets only)',as)}</div><div class="g2" style="margin-top:14px">${tb(['Asset breakdown','Balance'],B.accounts.filter(a=>isAsset(a)&&a.balance>0).map(a=>[a.name||a.bank,a.balance]))+tb(['Liability breakdown','Debt'],B.accounts.filter(a=>owe(a)>0).map(a=>[a.name||a.bank,owe(a)]))}</div>`;
+}
+// ---------- Goals ----------
+function goalEdit(g,k,v){
+ if(k=='amt')g[g.amountType=='bufferMonths'?'bufferMonths':'fixedAmount']=parseFloat(v)||0;
+ else if(k=='amountType'){delete g.fixedAmount;delete g.bufferMonths;g.amountType=v;g[v=='bufferMonths'?'bufferMonths':'fixedAmount']=0}
+ else if(k=='name')g.name=v;else g[k]=v||null}
+function rGoals(){
+ const G=B.goals||[],as=B.accounts.filter(a=>isAsset(a)).reduce((s,a)=>s+(+a.balance||0),0),
+ li=B.accounts.reduce((s,a)=>s+liab(a),0),funds=as-li,
+ mexp=B.expenses.reduce((s,e)=>s+(e.monthly||0),0),sur=B.income.reduce((s,x)=>s+(x.monthly||0),0)-mexp,w=Math.max(14,...G.map(g=>String(g.name).length+3));
+ let cum=0,done=0,need=0;
+ const rows=G.map((g,i)=>{const buf=g.amountType=='bufferMonths',tg=buf?(g.bufferMonths||0)*mexp:(g.fixedAmount||0),ach=!!g.achievedDate,before=cum;cum+=tg;if(ach)done++;const nd=Math.max(cum-funds,0),pj=ach?{t:'Achieved',c:''}:nd<=0?{t:'Funded now',c:'pos'}:sur<=0?{t:'Not at current surplus',c:'neg'}:(()=>{const d=new Date(Date.now()+nd/sur*30.44*864e5);return{t:d.toLocaleDateString('en-AU',{month:'short',year:'numeric'}),c:g.targetDate&&d>new Date(g.targetDate)?'neg':'pos'}})();
+  const al=Math.min(Math.max(funds-before,0),tg),sh=ach?0:tg-al,mo=g.targetDate?(new Date(g.targetDate)-Date.now())/(30.44*864e5):0,pc=ach||!tg?100:al/tg*100;need+=sh;
+  const I=(k,v,x,st)=>`<input ${x||''} ${st?`style="${st}"`:''} data-t="goal" data-i="${i}" data-k="${k}" value="${esc(v??'')}">`;
+  return`<tr><td><button class="btn x" data-mv="${i}:-1" ${i?'':'disabled'}>▲</button><button class="btn x" data-mv="${i}:1" ${i<G.length-1?'':'disabled'}>▼</button> ${i+1}</td><td>${I('name',g.name,'',`width:${w}ch`)}</td><td><select data-t="goal" data-i="${i}" data-k="amountType"><option value="fixed" ${buf?'':'selected'}>Fixed</option><option value="bufferMonths" ${buf?'selected':''}>Months of expenses</option></select></td><td>${I('amt',buf?g.bufferMonths:g.fixedAmount,'type="number" step="0.01"')}</td><td>${$f(tg)}</td><td>${$f(cum)}</td><td>${I('targetDate',g.targetDate,'type="date"')}</td><td style="width:70px">${pc.toFixed(0)}%<div style="height:5px;border-radius:3px;background:#eee"><div style="height:5px;border-radius:3px;width:${pc}%;background:var(--g)"></div></div></td><td>${ach?'Achieved':$f(sh)}</td><td>${ach||sh<=0?'-':$f(mo>1?sh/mo:sh)}</td><td class="${pj.c}">${pj.t}</td><td>${I('achievedDate',g.achievedDate,'type="date"')}</td><td>${ach?`<button class="btn x" data-ga="${i}:clear">Reopen</button>`:`<button class="btn x" data-ga="${i}:today">Mark achieved</button>`} <button class="btn x" data-dx="goal:${i}">Delete</button></td></tr>`});
+ $('#gt').innerHTML='<tr><th>Priority</th><th>Goal</th><th>Type</th><th>Amount / months</th><th>Target</th><th>Cumulative</th><th>Target date</th><th>Funded</th><th>Still needed</th><th>Savings req</th><th>Projected funded</th><th>Achieved on</th><th></th></tr>'+(rows.join('')||'<tr><td colspan="13">No goals yet. Add one below.</td></tr>');
+ $('#gs').innerHTML=`<div class="stat">Net funds<b class="${funds<0?'neg':''}">${$f(funds)}</b></div><div class="stat">Monthly surplus<b class="${sur<0?'neg':''}">${$f(sur)}</b></div><div class="stat">Achieved<b>${done} of ${G.length}</b></div><div class="stat">Cumulative target<b>${$f(cum)}</b></div><div class="stat">Still needed<b>${$f(Math.max(cum-funds,0))}</b></div><div class="stat">Funds left after goals<b>${$f(Math.max(funds-cum,0))}</b></div>`;
+}
+$('#gy').onchange=e=>$('#gl').textContent=e.target.value=='bufferMonths'?'Months':'Amount';
+$('#gf').onsubmit=e=>{e.preventDefault();const y=$('#gy').value,g={id:Date.now()+Math.random(),name:$('#gn').value.trim(),amountType:y,targetDate:$('#gd').value||null,achievedDate:null};g[y=='bufferMonths'?'bufferMonths':'fixedAmount']=parseFloat($('#ga').value);(B.goals=B.goals||[]).push(g);e.target.reset();$('#gl').textContent='Amount';persist()};
+// ---------- Insights ----------
+const SO={};
+function stbl(id,cols,rows){const o=SO[id]||{};if(o.k){const c=cols.find(c=>c.k==o.k);rows=[...rows].sort((a,b)=>(c.n?a[o.k]-b[o.k]:String(a[o.k]).localeCompare(String(b[o.k])))*o.d)}
+ return`<table><tr>${cols.map(c=>`<th style="cursor:pointer" data-so="${id}:${c.k}">${c.l}${o.k==c.k?(o.d>0?' ▲':' ▼'):''}</th>`).join('')}</tr>${rows.map(r=>'<tr>'+cols.map(c=>`<td>${c.n?(c.p?r[c.k].toFixed(2)+'%':$f(r[c.k])):esc(r[c.k])}</td>`).join('')+'</tr>').join('')}</table>`}
+function rIns(){
+ const sm=f=>K.map(k=>`<div class="stat">${k}<b class="${f(k)<0?'neg':''}">${$f(f(k))}</b></div>`).join(''),I=k=>B.income.reduce((s,x)=>s+(x[k]||0),0),E=k=>B.expenses.reduce((s,x)=>s+(x[k]||0),0);
+ $('#i1').innerHTML=sm(I);$('#i2').innerHTML=sm(E);$('#i3').innerHTML=sm(k=>I(k)-E(k));
+ const ty=E('yearly'),iy=I('yearly'),pc=['daily','weekly','fortnightly','monthly','yearly'],z=()=>Object.fromEntries(pc.map(k=>[k,0])),
+ cols=[{k:'source',l:'Description'},{k:'category',l:'Category'},...pc.map(k=>({k,l:k[0].toUpperCase()+k.slice(1),n:1})),{k:'pe',l:'% of expense',n:1,p:1},{k:'pi',l:'% of income',n:1,p:1}],
+ row=x=>({...x,pe:ty?x.yearly/ty*100:0,pi:iy?x.yearly/iy*100:0});
+ $('#i4').innerHTML=stbl('ea',cols,B.expenses.map(e=>row({source:e.source,category:e.category,...Object.fromEntries(pc.map(k=>[k,e[k]||0]))})));
+ const cm=new Map();B.expenses.forEach(e=>{const c=e.category||'Uncategorized',o=cm.get(c)||{category:c,...z()};pc.forEach(k=>o[k]+=e[k]||0);cm.set(c,o)});
+ $('#i5').innerHTML=stbl('ca',cols.filter(c=>c.k!='source'),[...cm.values()].map(row));
+}
+// ---------- Spending ----------
+let view='weekly',cur=new Date(),ed=null,ch=null;
+function range(d,v){let s=new Date(d),e=new Date(d),n=1;
+ if(v=='daily'){s.setHours(0,0,0,0);e.setHours(23,59,59,999)}
+ else if(v=='weekly'){const w=s.getDay();s.setDate(s.getDate()-w+(w==0?-6:1));s.setHours(0,0,0,0);e=new Date(s);e.setDate(s.getDate()+6);e.setHours(23,59,59,999);n=7}
+ else if(v=='monthly'){s=new Date(d.getFullYear(),d.getMonth(),1);e=new Date(d.getFullYear(),d.getMonth()+1,0,23,59,59,999);n=e.getDate()}
+ else{const y=d.getFullYear();s=new Date(y,0,1);e=new Date(y,11,31,23,59,59,999);n=(y%4==0&&y%100!=0)||y%400==0?366:365}
+ return{s,e,n}}
+const catOpts=(sel,blank)=>(blank?'<option value="">Select</option>':'')+[...new Set(['Uncategorized',...B.expenses.map(e=>e.source),...(sel?[sel]:[])])].sort().map(s=>`<option value="${esc(s)}" ${s==sel?'selected':''}>${esc(s)}</option>`).join('');
+function calc(pred,d){const r=new Map(B.expenses.map(e=>[e.source,{b:(e.daily||0)*d,a:0}]));S.filter(pred).forEach(s=>{const k=r.has(s.category)?s.category:'Uncategorized';if(!r.has(k))r.set(k,{b:0,a:0});r.get(k).a+=s.amount});return r}
+function rSpend(){
+ $('#sc').innerHTML=catOpts($('#sc').value,1);
+ const p=range(cur,view),r=calc(s=>{const t=new Date(s.date);return t>=p.s&&t<=p.e},p.n);let tb=0,ta=0;r.forEach(v=>{tb+=v.b;ta+=v.a});
+ $('#pd').textContent=p.s.toLocaleDateString()+' - '+p.e.toLocaleDateString();
+ document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v==view));
+ $('#sm').innerHTML=`<div class="stat">Budgeted<b>${$f(tb)}</b></div><div class="stat">Actual<b>${$f(ta)}</b></div><div class="stat">Variance<b class="${tb>=ta?'pos':'neg'}">${$f(tb-ta)}</b><small>${pt(tb,ta)}</small></div>`;
+ const mx=Math.max(1,...[...r.values()].map(v=>Math.max(v.a,v.b)));
+ $('#va').innerHTML='<tr><th>Budget item</th><th>Budgeted</th><th>Actual</th><th>Variance</th><th>Over / under</th></tr>'+[...r].filter(([k,v])=>v.a||v.b).sort().map(([k,v])=>{const d=v.b-v.a,c=d>=0?'pos':'neg';return`<tr><td>${esc(k)}</td><td>${$f(v.b)}</td><td>${$f(v.a)}</td><td class="${c}">${$f(d)}</td><td class="${c}">${pt(v.b,v.a)}</td></tr>`}).join('');
+ let o='';[...new Set(S.map(s=>String(s.date).slice(0,7)))].sort().reverse().forEach(k=>{const[yy,mm]=k.split('-').map(Number);[...calc(s=>String(s.date).slice(0,7)==k,new Date(yy,mm,0).getDate())].sort().forEach(([c,v])=>{if(v.a>v.b)o+=`<tr><td>${k}</td><td>${esc(c)}</td><td>${$f(v.b)}</td><td>${$f(v.a)}</td><td class="neg">${$f(v.a-v.b)}</td></tr>`})});
+ $('#os').innerHTML='<tr><th>Month</th><th>Budget item</th><th>Budgeted</th><th>Spent</th><th>Overspend</th></tr>'+(o||'<tr><td colspan="5">No overspending found.</td></tr>');
+ $('#lg').innerHTML='<tr><th>Date</th><th>Item</th><th>Description</th><th>Amount</th><th></th></tr>'+S.map(s=>s.id==ed?`<tr><td><input type="date" id="e1" value="${String(s.date).slice(0,10)}"></td><td><select id="e2">${catOpts(s.category)}</select></td><td><input id="e3" value="${esc(s.description)}"></td><td><input id="e4" type="number" step="0.01" value="${s.amount}"></td><td><button class="btn x" data-sv="${s.id}">Save</button> <button class="btn x" data-cn="1">Cancel</button></td></tr>`:`<tr><td>${String(s.date).slice(0,10)}</td><td>${esc(s.category)}</td><td>${esc(s.description)}</td><td>${$f(s.amount)}</td><td><button class="btn x" data-ed="${s.id}">Edit</button> <button class="btn x" data-dx="spd:${s.id}">Delete</button></td></tr>`).join('');
+}
+// ---------- Chart ----------
+function rChart(){
+ const per=[...new Set(S.flatMap(s=>{const d=String(s.date);return[d.slice(0,4),d.slice(0,7)]}))].sort().reverse(),keep=$('#cp').value;
+ $('#cp').innerHTML=per.map(p=>`<option ${p==keep?'selected':''}>${p}</option>`).join('')||'<option value="">No data</option>';
+ if(ch){ch.destroy();ch=null}
+ const p=$('#cp').value,ok=typeof Chart!='undefined';$('#cm').textContent=ok?'':'Chart.js could not load. Check your internet connection.';if(!p||!ok)return;
+ const[y,m]=p.split('-').map(Number),d=m?new Date(y,m,0).getDate():(y%4==0&&y%100!=0)||y%400==0?366:365,r=[...calc(s=>String(s.date).startsWith(p),d)].filter(([k,v])=>v.a||v.b).sort();
+ ch=new Chart($('#cv'),{type:'bar',data:{labels:r.map(x=>x[0]),datasets:[{label:'Budgeted',data:r.map(x=>x[1].b),backgroundColor:'rgba(105,201,159,.6)'},{label:'Actual',data:r.map(x=>x[1].a),backgroundColor:'rgba(35,64,59,.6)'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{callback:v=>$f(v)}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+$f(c.parsed.y)}}}}});
+}
+const pt=(b,a)=>{if(!b)return a?'n/a':'-';const x=(b-a)/b*100;return x>=0?x.toFixed(1)+'% under':(-x).toFixed(1)+'% over'};
+let ch3=null;
+const periods=()=>[...new Set(S.flatMap(s=>{const d=String(s.date);return[d.slice(0,4),d.slice(0,7)]}))].sort().reverse();
+function fill(sel,per,def){const keep=sel.value||def;sel.innerHTML=per.map(p=>`<option ${p==keep?'selected':''}>${p}</option>`).join('')||'<option value="">No data</option>'}
+function rYoy(){
+ const per=periods(),mo=per.filter(p=>p.length>4),dB=mo[0]||per[0],dA=mo.find(p=>dB&&p.slice(5)==dB.slice(5)&&p!=dB)||mo[1]||per[1];
+ fill($('#ya'),per,dA);fill($('#yb'),per,dB);if(ch3){ch3.destroy();ch3=null}
+ const A=$('#ya').value,Q=$('#yb').value;$('#yt').innerHTML='';if(!A||!Q)return;
+ const ag=p=>{const m=new Map();S.filter(s=>String(s.date).startsWith(p)).forEach(s=>m.set(s.category,(m.get(s.category)||0)+s.amount));return m},a=ag(A),b=ag(Q),cats=[...new Set([...a.keys(),...b.keys()])].sort();
+ if(typeof Chart!='undefined')ch3=new Chart($('#yc'),{type:'bar',data:{labels:cats,datasets:[{label:A,data:cats.map(c=>a.get(c)||0),backgroundColor:'rgba(105,201,159,.7)'},{label:Q,data:cats.map(c=>b.get(c)||0),backgroundColor:'rgba(35,64,59,.7)'}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{beginAtZero:true,ticks:{callback:v=>$f(v)}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+$f(c.parsed.y)}}}}});
+ const row=(c,x,y)=>`<tr><td>${esc(c)}</td><td>${$f(x)}</td><td>${$f(y)}</td><td class="${y>x?'neg':'pos'}">${$f(y-x)}</td><td class="${y>x?'neg':'pos'}">${x?((y-x)/x*100).toFixed(1)+'%':'new'}</td></tr>`,ta=[...a.values()].reduce((s,v)=>s+v,0),tb=[...b.values()].reduce((s,v)=>s+v,0);
+ $('#yt').innerHTML=`<table><tr><th>Category</th><th>${A}</th><th>${Q}</th><th>Change</th><th>% change</th></tr>${cats.map(c=>row(c,a.get(c)||0,b.get(c)||0)).join('')}${row('Total',ta,tb)}</table>`;
+}
+const rCharts=()=>{rChart();rYoy()};
+function draw(){$('#abk').checked=!!(B.settings&&B.settings.autoBackup);$('#empty').style.display=(loaded||B.expenses.length||S.length)?'none':'block';rAlloc();rBudget();rIns();rDoom();rGoals();rSpend();rHealth();rBills();rChk();rSpendable();rPivot();rMonthly();if($('#charts').classList.contains('on'))rCharts()}
+// ---------- Account form ----------
+$('#at').onchange=e=>{const v=e.target.value;$('#l1').textContent=v=='credit'?'Available balance':v=='upcoming'?'Amount (paid out)':'Balance';$('#w4').style.display=v=='upcoming'?'':'none';$('#w2').style.display=v=='credit'?'':'none';$('#w3').style.display=(v=='offset'||v=='upcoming')?'none':''};
+$('#af').onsubmit=e=>{e.preventDefault();const ty=$('#at').value,a={type:ty,name:$('#an').value.trim(),bank:$('#ab').value.trim()},n=parseFloat($('#a1').value),r=parseFloat($('#a3').value)||0;
+ if(ty=='credit'){a.availableBalance=n;a.limit=parseFloat($('#a2').value)||0;a.interestRate=r}else if(ty=='upcoming'){a.balance=-Math.abs(n);if($('#a4').value)a.dueDate=$('#a4').value}else{a.balance=n;if(ty!='offset')a.interestRate=r}
+ B.accounts.push(a);e.target.reset();$('#at').onchange({target:$('#at')});persist()};
+// ---------- Saving safety ----------
+const stamp=()=>new Date().toISOString().slice(0,16).replace(/[-:]/g,'').replace('T','_');
+function sv(base,txt){dl(base+'.json',txt);if($('#abk').checked)setTimeout(()=>dl(base+'_'+stamp()+'.json',txt),600)}
+$('#abk').onchange=e=>{(B.settings=B.settings||{}).autoBackup=e.target.checked;persist()};
+window.onbeforeunload=e=>{if($('#dirty').style.display=='inline'){e.preventDefault();e.returnValue=''}};
+// ---------- Shared helpers ----------
+const lp=src=>{let b=null;S.forEach(s=>{if(s.category==src&&new Date(s.date)<=Date.now()&&(!b||s.date>b.date))b=s});return b};
+const isAsset=a=>!['mortgage','credit','upcoming'].includes(a.type);
+const liab=a=>a.type=='credit'?Math.max(0,a.limit-a.availableBalance):a.type=='mortgage'?Math.abs(a.balance||0):a.type=='upcoming'&&(!a.dueDate||new Date(a.dueDate+'T23:59:59')>=new Date())?Math.abs(a.balance||0):0;
+const acctOf=n=>{const b=B.buckets.find(b=>b.name==n);return b&&b.account&&B.accounts.find(x=>x.name==b.account&&isAsset(x))};
+const netInfo=()=>B.accounts.filter(isAsset).reduce((s,a)=>s+(+a.balance||0),0)-B.accounts.reduce((s,a)=>s+liab(a),0);
+const goalsTotal=()=>{const m=B.expenses.reduce((s,e)=>s+(e.monthly||0),0);return(B.goals||[]).reduce((s,g)=>s+(g.amountType=='bufferMonths'?(g.bufferMonths||0)*m:(g.fixedAmount||0)),0)};
+const addP=(d,f)=>{const x=new Date(d);if(f=='daily')x.setDate(x.getDate()+1);else if(f=='weekly')x.setDate(x.getDate()+7);else if(f=='fortnightly')x.setDate(x.getDate()+14);else if(f=='monthly')x.setMonth(x.getMonth()+1);else if(f=='quarterly')x.setMonth(x.getMonth()+3);else x.setFullYear(x.getFullYear()+1);return x};
+function due(e){const l=lp(e.source),ov=e.dueDate?new Date(e.dueDate):null;if(ov&&(!l||ov>new Date(l.date)))return{d:ov,m:'override'};return l?{d:addP(l.date,e.frequency),m:'inferred'}:{d:null,m:'unknown'}}
+// ---------- Bucket health ----------
+function rHealth(){
+ const g=new Map(B.buckets.map(b=>[b.name,{b,v:0,n:0}]));
+ B.expenses.forEach(e=>{const o=g.get(e.bucket);if(!o)return;const l=lp(e.source),cap=e.amount||0;if(!l){o.v+=cap;o.n++}else o.v+=Math.min(cap,(e.yearly||0)/365.25*(Date.now()-new Date(l.date))/864e5)});
+ const acc=new Map(),rows=[];
+ g.forEach(o=>{const a=o.b.account&&B.accounts.find(x=>x.name==o.b.account&&isAsset(x));
+  if(a){const k=a.name+'|'+a.bank,r=acc.get(k)||{n:a.name+' ('+a.bank+')',bs:[],v:0,bal:a.balance,no:0};r.bs.push(o.b.name);r.v+=o.v;r.no+=o.n;acc.set(k,r)}
+  else rows.push({n:o.b.name+' (no linked account)',bs:[o.b.name],v:o.v,bal:null,no:o.n})});
+ $('#bh').innerHTML='<table><tr><th>Account</th><th>Buckets</th><th>Should hold</th><th>Actual</th><th>Difference</th><th>Status</th></tr>'+([...acc.values(),...rows].map(r=>{const d=r.bal==null?null:r.bal-r.v,c=d==null?'':d>=0?'pos':'neg';return`<tr><td>${esc(r.n)}</td><td>${esc(r.bs.join(', '))}</td><td>${$f(r.v)}${r.no?`<br><small>${r.no} bill(s) with no payment on record</small>`:''}</td><td>${r.bal==null?'-':$f(r.bal)}</td><td class="${c}">${d==null?'-':$f(d)}</td><td class="${c}">${d==null?'Link an account':d>=0?'Ahead':'Behind'}</td></tr>`}).join('')||'<tr><td colspan="6">Add buckets and link accounts to see this.</td></tr>')+'</table>';
+}
+// ---------- Bills ----------
+function rBills(){
+ const w=+$('#bw').value,now=Date.now(),list=B.expenses.map((e,i)=>({e,i,...due(e)})).filter(x=>x.e.bill!==false).sort((a,b)=>(a.d?+a.d:1e15)-(b.d?+b.d:1e15)),inw=x=>x.d&&(x.d-now)/864e5<=w,cv=new Map();
+ list.filter(inw).forEach(x=>{const a=acctOf(x.e.bucket),k=a?a.name+' ('+a.bank+')':(x.e.bucket||'Unallocated'),r=cv.get(k)||{due:0,bal:a?a.balance:null};r.due+=x.e.amount;cv.set(k,r)});
+ $('#bcv').innerHTML='<table><tr><th>Account / bucket</th><th>Due in window</th><th>Balance</th><th>Status</th></tr>'+([...cv].map(([k,r])=>{const d=r.bal==null?null:r.bal-r.due;return`<tr><td>${esc(k)}</td><td>${$f(r.due)}</td><td>${r.bal==null?'-':$f(r.bal)}</td><td class="${d==null?'':d>=0?'pos':'neg'}">${d==null?'No linked account':d>=0?'Covered':'Short by '+$f(-d)}</td></tr>`}).join('')||'<tr><td colspan="4">Nothing due in this window.</td></tr>')+'</table>';
+ $('#blt').innerHTML='<table><tr><th>Due</th><th>Bill</th><th>Bucket</th><th>Amount</th><th>Basis</th><th>Override date</th></tr>'+list.map(x=>{const dd=x.d?Math.round((x.d-now)/864e5):null;return`<tr style="${inw(x)?'':'color:#999'}"><td class="${dd!=null&&dd<0?'neg':''}">${x.d?x.d.toLocaleDateString('en-AU')+' ('+(dd<0?-dd+' days overdue':'in '+dd+' days')+')':'Unknown'}</td><td>${esc(x.e.source)}</td><td>${esc(x.e.bucket||'')}</td><td>${$f(x.e.amount)}</td><td>${x.m}</td><td><input type="date" data-t="exp" data-i="${x.i}" data-k="dueDate" value="${esc(x.e.dueDate||'')}"></td></tr>`}).join('')+'</table>';
+}
+$('#bw').onchange=rBills;
+// ---------- Budget check ----------
+function rChk(){
+ const now=Date.now(),done=S.filter(s=>+new Date(s.date)<=now),first=done.length?Math.min(...done.map(s=>+new Date(s.date))):now,
+ avail=Math.max(1,(now-first)/864e5),req=$('#cka').checked?Infinity:(+$('#ckm').value||12)*30.4375,days=Math.max(7,Math.min(req,avail)),cut=now-days*864e5,act=new Map();
+ done.filter(s=>+new Date(s.date)>=cut).forEach(s=>act.set(s.category,(act.get(s.category)||0)+s.amount));
+ const src=new Set(B.expenses.map(e=>e.source)),rows=[];let tb=0,ta=0;
+ B.expenses.forEach((e,i)=>{const a=act.get(e.source)||0,b=(e.yearly||0)*days/365.25,d=b-a,c=d>=0?'pos':'neg',sg=b?e.amount*a/b:0;tb+=b;ta+=a;
+  rows.push({d:Math.abs(d),h:`<tr><td>${esc(e.source)}</td><td>${$f(b)}</td><td>${$f(a)}</td><td class="${c}">${$f(d)}</td><td class="${c}">${pt(b,a)}</td><td>${b?$f(sg)+' '+e.frequency:'-'}</td><td>${b&&Math.abs(d)>1?`<button class="btn x" data-ap="${i}" data-sg="${sg.toFixed(2)}">Apply</button>`:''}</td></tr>`})});
+ act.forEach((v,k)=>{if(!src.has(k)){ta+=v;rows.push({d:v,h:`<tr><td>${esc(k)} <small>(not in budget)</small></td><td>${$f(0)}</td><td>${$f(v)}</td><td class="neg">${$f(-v)}</td><td class="neg">n/a</td><td>-</td><td></td></tr>`})}});
+ rows.sort((x,y)=>y.d-x.d);
+ $('#cknote').textContent=`Looking at the last ${(days/30.4375).toFixed(1)} months of spending${req>avail?' (all that is logged, which is less than requested)':''}. The budget is scaled to the same length. One-off purchases can skew a line, so review before applying a suggestion.`;
+ $('#ck').innerHTML='<table><tr><th>Budget item</th><th>Budget (period)</th><th>Actual</th><th>Variance</th><th>Over / under</th><th>Suggested</th><th></th></tr>'+rows.map(r=>r.h).join('')+`<tr><th>Total</th><th>${$f(tb)}</th><th>${$f(ta)}</th><th>${$f(tb-ta)}</th><th>${pt(tb,ta)}</th><th></th><th></th></tr></table>`;
+}
+$('#ckm').oninput=$('#cka').onchange=rChk;
+// ---------- Spendable ----------
+function rSpendable(){
+ const ded=$('#ded').checked,base=netInfo()-(ded?goalsTotal():0),ty=B.expenses.reduce((s,e)=>s+(e.yearly||0),0),
+ cols=[{k:'source',l:'Description'},{k:'category',l:'Category'},{k:'yearly',l:'Yearly cost',n:1},{k:'pe',l:'% of expense',n:1,p:1},{k:'sp',l:'Spendable',n:1}],
+ mk=x=>({...x,pe:ty?x.yearly/ty*100:0,sp:ty?base*x.yearly/ty:0});
+ $('#i6h').innerHTML=`Amount being shared out: <b>${$f(base)}</b> (net position${ded?' after goal targets':''})`;
+ $('#i6').innerHTML=stbl('sl',cols,B.expenses.map(e=>mk({source:e.source,category:e.category,yearly:e.yearly||0})));
+ const cm=new Map();B.expenses.forEach(e=>{const c=e.category||'Uncategorized';cm.set(c,(cm.get(c)||0)+(e.yearly||0))});
+ $('#i7').innerHTML=stbl('sk',cols.filter(c=>c.k!='source'),[...cm].map(([category,yearly])=>mk({category,yearly})));
+}
+$('#ded').onchange=rSpendable;
+// ---------- Annual pivot ----------
+function rPivot(){
+ const fy=$('#pv2').value=='fy',roll=$('#pv1').value=='cat',now=Date.now(),cat=new Map(B.expenses.map(e=>[e.source,e.category||'Uncategorized'])),cells=new Map(),mon=new Map();
+ S.filter(s=>new Date(s.date)<=now).forEach(s=>{const d=String(s.date),y=+d.slice(0,4),m=+d.slice(5,7),yr=fy&&m>=7?y+1:y,k=roll?(cat.get(s.category)||s.category||'Uncategorized'):(s.category||'Uncategorized'),r=cells.get(k)||new Map();
+  r.set(yr,(r.get(yr)||0)+s.amount);cells.set(k,r);(mon.get(yr)||mon.set(yr,new Set()).get(yr)).add(d.slice(0,7))});
+ const Y=[...mon.keys()].sort(),lab=y=>fy?'FY'+y:y,rows=[...cells].map(([k,r])=>({k,r,t:[...r.values()].reduce((s,v)=>s+v,0)})).sort((a,b)=>b.t-a.t),
+ mx=Math.max(1,...rows.flatMap(x=>[...x.r.values()])),tot=y=>rows.reduce((s,x)=>s+(x.r.get(y)||0),0),
+ chg=(a,b)=>`<td class="${b>a?'neg':'pos'}">${$f(b-a)}</td><td class="${b>a?'neg':'pos'}">${a?((b-a)/a*100).toFixed(1)+'%':'new'}</td>`;
+ $('#pv').innerHTML='<table><tr><th>'+(roll?'Category':'Budget item')+'</th>'+Y.map(y=>`<th>${lab(y)}<br><small>${mon.get(y).size} mo of data</small></th>`).join('')+Y.slice(1).map((y,i)=>`<th>${lab(Y[i])} → ${lab(y)}</th><th>% change</th>`).join('')+'</tr>'+
+ rows.map(x=>`<tr><td>${esc(x.k)}</td>${Y.map(y=>{const v=x.r.get(y)||0;return`<td style="background:rgba(105,201,159,${(v/mx*.55).toFixed(2)})">${v?$f(v):'-'}</td>`}).join('')}${Y.slice(1).map((y,i)=>chg(x.r.get(Y[i])||0,x.r.get(y)||0)).join('')}</tr>`).join('')+
+ `<tr><th>Total</th>${Y.map(y=>`<th>${$f(tot(y))}</th>`).join('')}${Y.slice(1).map((y,i)=>{const a=tot(Y[i]),b=tot(y);return`<th>${$f(b-a)}</th><th>${a?((b-a)/a*100).toFixed(1)+'%':'new'}</th>`}).join('')}</tr></table>`;
+ $('#pvn').textContent='Shading shows relative size. Years with fewer than 12 months of data are partial, so compare them with care. Future-dated entries are excluded.';
+}
+$('#pv1').onchange=$('#pv2').onchange=rPivot;
+// ---------- Monthly pivot ----------
+function rMonthly(){
+ const now=Date.now(),yrs=[...new Set(S.filter(s=>new Date(s.date)<=now).map(s=>String(s.date).slice(0,4)))].sort().reverse(),keep=$('#my').value;
+ $('#my').innerHTML=yrs.map(y=>`<option ${y==keep?'selected':''}>${y}</option>`).join('')||'<option value="">No data</option>';
+ const y=$('#my').value;if(!y){$('#mt').innerHTML='';return}
+ const roll=$('#mr').value=='cat',cat=new Map(B.expenses.map(e=>[e.source,e.category||'Uncategorized'])),cells=new Map();
+ S.filter(s=>new Date(s.date)<=now&&String(s.date).slice(0,4)==y).forEach(s=>{const m=+String(s.date).slice(5,7)-1,k=roll?(cat.get(s.category)||s.category||'Uncategorized'):(s.category||'Uncategorized'),r=cells.get(k)||Array(12).fill(0);r[m]+=s.amount;cells.set(k,r)});
+ const rows=[...cells].map(([k,r])=>({k,r,t:r.reduce((a,b)=>a+b,0)})).sort((a,b)=>b.t-a.t),mx=Math.max(1,...rows.flatMap(x=>x.r)),M=['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'],ct=i=>rows.reduce((s,x)=>s+x.r[i],0);
+ $('#mt').innerHTML='<table><tr><th>'+(roll?'Category':'Budget item')+'</th>'+M.map(m=>`<th>${m}</th>`).join('')+'<th>Total</th></tr>'+
+ rows.map(x=>`<tr><td>${esc(x.k)}</td>${x.r.map(v=>`<td style="background:rgba(105,201,159,${(v/mx*.55).toFixed(2)})">${v?$f(v):'-'}</td>`).join('')}<td><b>${$f(x.t)}</b></td></tr>`).join('')+
+ `<tr><th>Total</th>${M.map((m,i)=>`<th>${$f(ct(i))}</th>`).join('')}<th>${$f(rows.reduce((s,x)=>s+x.t,0))}</th></tr></table>`;
+}
+$('#my').onchange=$('#mr').onchange=rMonthly;
+// ---------- Single-file load / save (no browser storage) ----------
+let loaded=false;
+const pack=()=>JSON.stringify({...B,hubVersion:1,spending:S},null,2);
+function ingest(d){
+ if(Array.isArray(d)){S=d.map(e=>({...e,id:e.id||Date.now()+Math.random()}));return}
+ if(!d||typeof d!='object'||!['accounts','income','expenses','spending'].some(k=>Array.isArray(d[k])))throw new Error('Not a budget or spending file');
+ const{spending,...rest}=d;B=rest;norm();
+ if(Array.isArray(spending))S=spending.map(e=>({...e,id:e.id||Date.now()+Math.random()}))}
+function pickMany(){const i=document.createElement('input');i.type='file';i.accept='.json';i.multiple=true;
+ i.onchange=async()=>{let ok=0;for(const f of i.files){try{ingest(JSON.parse(await f.text()));ok++}catch(e){alert('Could not read '+f.name+': '+e.message)}}if(ok){loaded=true;norm();sortS();persist();clean()}};i.click()}
+// ---------- Events ----------
+document.addEventListener('change',e=>{const t=e.target,d=t.dataset;
+ if(d.a!==undefined){const x=B.expenses[d.a];t.value?x.bucket=t.value:delete x.bucket;return persist()}
+ if(d.t){const x={exp:B.expenses,inc:B.income,acc:B.accounts,goal:B.goals||[]}[d.t][d.i],v=t.value;
+  if(d.t=='goal')goalEdit(x,d.k,v);else if(d.t=='acc'){if(d.k=='name')B.buckets.forEach(b=>{if(b.account==x.name)b.account=v});if(d.k=='upAmt')x.balance=-Math.abs(parseFloat(v)||0);else if(d.k=='dueDate'){v?x.dueDate=v:delete x.dueDate}else x[d.k]=(d.k=='name'||d.k=='bank')?v:parseFloat(v)||0}
+  else if(d.k=='amount'||d.k=='frequency'){const a=d.k=='amount'?parseFloat(v):x.amount,f=d.k=='frequency'?v:x.frequency;if(isNaN(a))return;Object.assign(x,conv(a,f),{amount:a,frequency:f})}
+  else if(d.k=='bill'){t.checked?delete x.bill:x.bill=false}else if(d.k=='dueDate'){v?x.dueDate=v:delete x.dueDate}else x[d.k]=v;persist()}});
+document.addEventListener('click',e=>{const d=e.target.dataset;
+ if(d.so){const[i,k]=d.so.split(':'),o=SO[i];SO[i]=o&&o.k==k?{k,d:-o.d}:{k,d:1};rIns();rSpendable()}
+ if(d.v){view=d.v;rSpend()}
+ if(d.ga){const[i,a]=d.ga.split(':');B.goals[i].achievedDate=a=='today'?new Date().toISOString().slice(0,10):null;persist()}
+ if(d.ap&&confirm('Update this budget amount to the suggested figure?')){const x=B.expenses[+d.ap],a=parseFloat(d.sg);Object.assign(x,conv(a,x.frequency),{amount:a});persist()}
+ if(d.ma){const[i,n]=d.ma.split(':').map(Number),A=B.accounts,j=i+n;if(A[j]){[A[i],A[j]]=[A[j],A[i]];persist()}}
+ if(d.mv){const[i,n]=d.mv.split(':').map(Number),G=B.goals,j=i+n;if(G[j]){[G[i],G[j]]=[G[j],G[i]];persist()}}
+ if(d.nav){const n=+d.nav;if(view=='daily')cur.setDate(cur.getDate()+n);else if(view=='weekly')cur.setDate(cur.getDate()+7*n);else if(view=='monthly'){cur.setDate(1);cur.setMonth(cur.getMonth()+n)}else cur.setFullYear(cur.getFullYear()+n);rSpend()}
+ if(d.ed){ed=d.ed;rSpend()}
+ if(d.cn){ed=null;rSpend()}
+ if(d.sv){const s=S.find(x=>x.id==d.sv),a=parseFloat($('#e4').value);if(isNaN(a)||!$('#e1').value)return alert('Enter a valid date and amount.');s.date=new Date($('#e1').value).toISOString();s.category=$('#e2').value;s.description=$('#e3').value;s.amount=a;ed=null;sortS();persist()}
+ if(d.tab){document.querySelectorAll('nav button,.tab').forEach(x=>x.classList.remove('on'));e.target.classList.add('on');$('#'+d.tab).classList.add('on');if(d.tab=='charts')rCharts()}
+ if(d.ren){const n=(prompt('Rename bucket',d.ren)||'').trim();if(n&&n!=d.ren&&!B.buckets.some(b=>b.name==n)){B.buckets.find(b=>b.name==d.ren).name=n;B.expenses.forEach(x=>{if(x.bucket==d.ren)x.bucket=n});persist()}}
+ if(d.delb&&confirm('Delete this bucket? Its expenses become unallocated.')){B.buckets=B.buckets.filter(b=>b.name!=d.delb);B.expenses.forEach(x=>{if(x.bucket==d.delb)delete x.bucket});persist()}
+ if(d.dx&&confirm('Delete this entry?')){const[t,i]=d.dx.split(':');if(t=='spd')S=S.filter(s=>s.id!=i);else({exp:B.expenses,inc:B.income,acc:B.accounts,goal:B.goals||[]}[t]).splice(+i,1);persist()}});
+$('#cyc').onchange=e=>{cycle=e.target.value;draw()};$('#cp').onchange=rChart;$('#ya').onchange=$('#yb').onchange=rYoy;
+$('#bf').onsubmit=e=>{e.preventDefault();const n=$('#bn').value.trim(),acc=B.accounts.find(a=>a.name==$('#ba').value);if(B.buckets.some(b=>b.name==n))return alert('A bucket with that name already exists.');
+ const b={name:n,bank:$('#bb').value.trim()||acc?.bank||''};if(acc)b.account=acc.name;B.buckets.push(b);e.target.reset();persist()};
+$('#nf').onsubmit=e=>{e.preventDefault();const a=parseFloat($('#na').value),f=$('#nq').value;B.income.push({...conv(a,f),amount:a,source:$('#ns').value,frequency:f});e.target.reset();persist()};
+$('#ef').onsubmit=e=>{e.preventDefault();const a=parseFloat($('#ea').value),f=$('#eq').value;B.expenses.push({...conv(a,f),amount:a,source:$('#es').value,category:$('#ec').value,frequency:f});e.target.reset();persist()};
+$('#sf').onsubmit=e=>{e.preventDefault();S.push({id:Date.now(),date:new Date($('#sd').value).toISOString(),amount:parseFloat($('#sa').value),description:$('#sn').value,category:$('#sc').value});sortS();e.target.reset();$('#sd').valueAsDate=new Date();persist()};
+// ---------- Init ----------
+document.querySelectorAll('.fq').forEach(s=>s.innerHTML=fq('monthly'));$('#sd').valueAsDate=new Date();
 
-                <div id="offset-form" class="account-form" style="display:none;">
-                    <h3>Offset Account</h3>
-                    <label for="offset-name">Name:</label>
-                    <input type="text" id="offset-name"><br>
-                    <label for="offset-bank">Bank:</label>
-                    <input type="text" id="offset-bank"><br>
-                    <label for="offset-balance">Balance:</label>
-                    <input type="number" id="offset-balance"><br>
-                    <button type="button" onclick="addOffsetAccount()">Add Offset Account</button>
-                </div>
-
-                <div id="mortgage-form" class="account-form" style="display:none;">
-                    <h3>Mortgage Account</h3>
-                    <label for="mortgage-name">Name:</label>
-                    <input type="text" id="mortgage-name"><br>
-                    <label for="mortgage-bank">Bank:</label>
-                    <input type="text" id="mortgage-bank"><br>
-                    <label for="mortgage-balance">Balance:</label>
-                    <input type="number" id="mortgage-balance"><br>
-                    <label for="mortgage-interest-rate">Interest Rate (%):</label>
-                    <input type="number" step="0.01" id="mortgage-interest-rate"><br>
-                    <button type="button" onclick="addMortgageAccount()">Add Mortgage Account</button>
-                </div>
-            </div>
-
-            <div class="input-form">
-                <h2>Add Income</h2>
-                <label for="income-amount">Amount:</label>
-                <input type="number" id="income-amount"><br>
-                <label for="income-source">Source:</label>
-                <input type="text" id="income-source"><br>
-                <label for="income-frequency">Frequency:</label>
-                <select id="income-frequency">
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="fortnightly">Fortnightly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="quarterly">Quarterly</option>
-                    <option value="yearly">Yearly</option>
-                </select><br>
-                <button type="button" onclick="addIncome()">Add Income</button>
-            </div>
-
-            <div class="expense-form">
-                <h2>Add Expense</h2>
-                <label for="expense-amount">Amount:</label>
-                <input type="number" id="expense-amount"><br>
-                <label for="expense-source">Description:</label>
-                <input type="text" id="expense-source"><br>
-                <label for="expense-category">Category:</label>
-                <input type="text" id="expense-category"><br>
-                <label for="expense-frequency">Frequency:</label>
-                <select id="expense-frequency">
-                    <option value="daily">Daily</option>
-                    <option value="weekly">Weekly</option>
-                    <option value="fortnightly">Fortnightly</option>
-                    <option value="monthly">Monthly</option>
-                    <option value="quarterly">Quarterly</option>
-                    <option value="yearly">Yearly</option>
-                </select><br>
-                <button type="button" onclick="addExpense()">Add Expense</button>
-            </div>
-        </div>
-
-        <div id="view" class="tab-content">
-            <div id="accounts-section">
-                <h2>Accounts</h2>
-                <div>
-                    <h3>Everyday Accounts</h3>
-                    <table id="everyday-accounts-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Bank</th>
-                                <th>Balance</th>
-                                <th>Interest Rate</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="everyday-accounts-body">
-                            </tbody>
-                    </table>
-                </div>
-
-                <div>
-                    <h3>Credit Card Accounts</h3>
-                    <table id="credit-accounts-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Bank</th>
-                                <th>Available Balance</th>
-                                <th>Credit Limit</th>
-                                <th>Interest Rate</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="credit-accounts-body">
-                            </tbody>
-                    </table>
-                </div>
-
-                <div>
-                    <h3>Offset Accounts</h3>
-                    <table id="offset-accounts-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Bank</th>
-                                <th>Balance</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="offset-accounts-body">
-                            </tbody>
-                    </table>
-                </div>
-
-                <div>
-                    <h3>Mortgage Accounts</h3>
-                    <table id="mortgage-accounts-table">
-                        <thead>
-                            <tr>
-                                <th>Name</th>
-                                <th>Bank</th>
-                                <th>Balance</th>
-                                <th>Interest Rate</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="mortgage-accounts-body">
-                            </tbody>
-                    </table>
-                </div>
-            </div>
-            <div id="income-table-container">
-                <h2>Income</h2>
-                <table id="income-table">
-                    <thead>
-                        <tr>
-                            <th>Amount</th>
-                            <th>Source</th>
-                            <th>Frequency</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="income-table-body">
-                        </tbody>
-                </table>
-            </div>
-
-            <div id="expense-table-container">
-                <h2>Expenses</h2>
-                <table id="expense-table">
-                    <thead>
-                        <tr>
-                            <th>Description</th>
-                            <th>Amount</th>
-                            <th>Category</th>
-                            <th>Frequency</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="expense-table-body">
-                        </tbody>
-                </table>
-            </div>
-
-        </div>
-
-        <div id="insights" class="tab-content">
-            <div id="frequency-summary">
-                <h2>Income Summary</h2>
-                <div id="frequency-summary-details">
-                    </div>
-            </div>
-
-            <div id="expense-summary">
-                <h2>Expense Summary</h2>
-                <div id="expense-summary-details">
-                    </div>
-            </div>
-
-            <div id="net-position-summary">
-                <h2>Net Position Summary</h2>
-                <div id="net-position-summary-details">
-                </div>
-            </div>
-
-            <div id="expense-analysis-container">
-                </div>
-        
-                <div id="category-analysis-container">
-                </div>
-        </div>
-
-        <div id="countdown" class="tab-content">
-            <div class="countdown-header">
-                <h2>Doomsday Scenario</h2>
-                <p>Analyzing your financial runway with no new income.</p>
-            </div>
-            <div class="financial-overview">
-                <div class="asset-card">
-                    <h3>Total Assets</h3>
-                    <p id="total-assets">$0.00</p>
-                    <div class="asset-breakdown">
-                        <h4>Asset Breakdown</h4>
-                        <table id="asset-breakdown-table">
-                            <thead>
-                                <tr>
-                                    <th>Account Name</th>
-                                    <th>Balance</th>
-                                </tr>
-                            </thead>
-                            <tbody id="asset-breakdown-body">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-                <div class="liability-card">
-                    <h3>Total Liabilities</h3>
-                    <p id="total-liabilities">$0.00</p>
-                    <div class="liability-breakdown">
-                        <h4>Liability Breakdown</h4>
-                        <table id="liability-breakdown-table">
-                            <thead>
-                                <tr>
-                                    <th>Account Name</th>
-                                    <th>Debt</th>
-                                </tr>
-                            </thead>
-                            <tbody id="liability-breakdown-body">
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-            <div class="overall-position net-position">
-                <h3>Overall Position</h3>
-                <p id="overall-position">$0.00</p>
-            </div>
-
-            <div class="time-until-no-money-container">
-                <div class="time-until-no-money net-time-until-no-money">
-                    <h3>Time Until No Money (Net)</h3>
-                    <table id="net-time-until-no-money-table">
-                        <thead>
-                            <tr>
-                                <th>Projected Time Remaining (Net)</th>
-                            </tr>
-                        </thead>
-                        <tbody id="net-time-until-no-money-body">
-                        </tbody>
-                    </table>
-                    <div class="date-of-no-funds net-date-of-no-funds">
-                        <h3>Projected Date of No Funds (Net)</h3>
-                        <p id="net-date-of-no-funds">N/A</p>
-                    </div>
-                </div>
-
-                <div class="time-until-no-money">
-                    <h3>Time Until No Money</h3>
-                    <table id="time-until-no-money-table">
-                        <thead>
-                            <tr>
-                                <th>Projected Time Remaining</th>
-                            </tr>
-                        </thead>
-                        <tbody id="time-until-no-money-body">
-                        </tbody>
-                    </table>
-                    <div class="date-of-no-funds">
-                        <h3>Projected Date of No Funds</h3>
-                        <p id="date-of-no-funds">N/A</p>
-                    </div>
-                </div>
-                
-            </div>
-        </div>
-
-        <div id="goals" class="tab-content">
-            <div class="goals-header">
-                <h2>Financial Goals</h2>
-                <p>
-                    Each goal is an amount <em>on top of</em> whatever comes before it in priority order &mdash;
-                    you don't need to work out the running total yourself. Your full monthly surplus goes toward
-                    closing goal #1's amount first; once it's covered, that same surplus rolls on to goal #2,
-                    and so on. Reorder with the arrows to change what stacks on what.
-                </p>
-                <div class="goals-summary">
-                    <div class="summary-card">
-                        <h3>Current Net Position</h3>
-                        <p id="goals-current-net-position">$0.00</p>
-                    </div>
-                    <div class="summary-card">
-                        <h3>Monthly Surplus</h3>
-                        <p id="goals-monthly-surplus">$0.00</p>
-                    </div>
-                </div>
-            </div>
-
-            <div id="goal-input-container">
-                <h2>Add Goal</h2>
-                <label for="goal-name">Goal Name:</label>
-                <input type="text" id="goal-name" placeholder="e.g., New Phones"><br>
-
-                <label for="goal-amount-type">Amount Type:</label>
-                <select id="goal-amount-type" onchange="showGoalAmountFields()">
-                    <option value="fixed">Fixed Dollar Amount</option>
-                    <option value="bufferMonths">Months of Budgeted Expenses (buffer)</option>
-                </select>
-
-                <div id="goal-fixed-fields" class="goal-amount-fields">
-                    <label for="goal-fixed-amount">Amount ($):</label>
-                    <input type="number" step="0.01" id="goal-fixed-amount" placeholder="e.g., 4000">
-                </div>
-
-                <div id="goal-buffer-fields" class="goal-amount-fields" style="display:none;">
-                    <label for="goal-buffer-months">Number of Months:</label>
-                    <input type="number" step="0.1" id="goal-buffer-months" placeholder="e.g., 6" oninput="updateGoalBufferPreview()">
-                    <p class="goal-buffer-hint">
-                        Right now that's <strong id="goal-buffer-preview">$0.00</strong> of your budgeted monthly
-                        expenses. This stays live &mdash; if your budget changes later, this goal's amount updates
-                        with it automatically.
-                    </p>
-                </div>
-
-                <label for="goal-target-date">Target Date (optional):</label>
-                <input type="date" id="goal-target-date"><br>
-                <button type="button" onclick="addGoal()">Add Goal</button>
-            </div>
-
-            <div id="goals-table-container">
-                <h2>Goals (priority order)</h2>
-                <table id="goals-table">
-                    <thead>
-                        <tr>
-                            <th>Priority</th>
-                            <th>Goal</th>
-                            <th>Amount</th>
-                            <th>Cumulative Target</th>
-                            <th>Target Date</th>
-                            <th>Progress</th>
-                            <th>Projected</th>
-                            <th>Status</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="goals-table-body">
-                        </tbody>
-                </table>
-            </div>
-        </div>
-    </main>
-
-    <script src="income.js"></script>
-    <script src="expenses.js"></script>
-    <script src="accounts.js"></script>
-    <script src="analyse.js"></script>
-    <script src="countdown.js"></script>
-    <script src="goals.js"></script>
-    <script src="layout.js"></script>
-    <script src="io.js"></script>
-    
-</body>
-</html>
+norm();sortS();draw();
+</script></body></html>
