@@ -4,7 +4,7 @@
 <link rel="stylesheet" id="theme" href="theme-paper.css"><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7"></script></head><body>
 <header><h1>Budget Hub <span id="dirty">unsaved changes</span></h1>
 <div><button class="btn" id="lb">Load file(s)</button> <button class="btn" id="sb">Save</button> <button class="btn x" id="sl">Export legacy files</button> <select id="thm"><option value="paper">Paper</option><option value="midnight">Midnight</option><option value="ledger">Ledger</option></select> <label style="font-size:.8em"><input type="checkbox" id="abk"> Auto backup</label></div></header>
-<nav><button class="on" data-tab="alloc">Allocation</button><button data-tab="budget">Budget</button><button data-tab="insights">Insights</button><button data-tab="doom">Doomsday</button><button data-tab="goals">Goals</button><button data-tab="bills">Bills</button><button data-tab="spend">Spending</button><button data-tab="chk">Budget check</button><button data-tab="charts">Charts</button></nav>
+<nav><button class="on" data-tab="alloc">Allocation</button><button data-tab="budget">Budget</button><button data-tab="insights">Insights</button><button data-tab="doom">Doomsday</button><button data-tab="goals">Goals</button><button data-tab="bills">Bills</button><button data-tab="spend">Spending</button><button data-tab="logtools">Log tools</button><button data-tab="chk">Budget check</button><button data-tab="charts">Charts</button><button data-tab="deep">Deep dive</button><button data-tab="whatif">What if</button></nav>
 <main>
 <div class="card" id="msg" style="display:none;border-left:5px solid var(--g)"></div>
 <div class="card" id="empty" style="display:none"><b>No data loaded.</b> Nothing is stored in your browser, so use <b>Load file(s)</b> to open your saved JSON: the combined file, or your old budget_data.json and spending_data.json together.</div>
@@ -32,6 +32,7 @@
 <section class="tab" id="bills"><div class="card"><h2>Bills coming up <select id="bw"><option value="30">Next 30 days</option><option value="60" selected>Next 60 days</option><option value="90">Next 90 days</option></select></h2><small>Due dates are inferred from your last payment in the spending log plus the bill's frequency. Set a date to override it; once you log a later payment, the inferred date takes over again.</small><h3>Cover check (balances before upcoming transfers)</h3><div class="sc" id="bcv"></div></div><div class="card"><h2>All bills</h2><div class="sc" id="blt"></div></div></section>
 <section class="tab" id="chk"><div class="card"><h2>Budget reality check</h2><label>Months of history <input id="ckm" type="number" min="1" value="12" style="width:80px;padding:4px"></label> <label><input type="checkbox" id="cka"> All history</label><br><small id="cknote"></small><div class="sc" id="ck"></div></div></section>
 <section class="tab" id="spend">
+ <div class="card" id="sts"></div>
  <div class="card"><h2>Log expense</h2><form class="f" id="sf"><label>Date<input id="sd" type="date" required></label><label>Amount<input id="sa" type="number" step="0.01" required></label><label>Description<input id="sn" required></label><label>Budget item<select id="sc" required></select></label><button class="btn">Add expense</button></form></div>
  <div class="card"><h2>Budget vs actual</h2><div class="stats" id="sm"></div><div style="text-align:center;margin:12px 0"><button class="btn x" data-nav="-1">&lt;&lt; Prev</button> <b id="pd"></b> <button class="btn x" data-nav="1">Next &gt;&gt;</button><div style="margin-top:8px"><button class="btn x" data-v="daily">Daily</button> <button class="btn x" data-v="weekly">Weekly</button> <button class="btn x" data-v="monthly">Monthly</button> <button class="btn x" data-v="yearly">Yearly</button></div></div><div class="sc"><table id="va"></table></div></div>
  <div class="card"><h2>Overspend by month</h2><div class="sc"><table id="os"></table></div></div>
@@ -43,6 +44,29 @@
 <div class="card"><h2>Cumulative spend <select id="cy"></select> <select id="cm2"><option value="cat">By budget category</option><option value="item">By budget item</option><option value="tot">Total vs budget pace</option></select></h2><div style="position:relative;height:55vh"><canvas id="cc"></canvas></div></div>
 <div class="card"><h2>Daily spending heatmap <select id="hy"></select></h2><div class="sc" id="hm"></div></div>
 <div class="card"><h2>Recurring bills vs everything else, by month</h2><div style="position:relative;height:45vh"><canvas id="ffc"></canvas></div></div></section>
+<section class="tab" id="logtools">
+ <div class="card"><h2>Find and fix entries</h2><form class="f" id="lf"><label>Search<input id="lq"></label><label>Category<select id="lc"></select></label><label>From<input id="lfr" type="date"></label><label>To<input id="lto" type="date"></label><label>Min $<input id="lmn" type="number" step="0.01"></label><label>Max $<input id="lmx" type="number" step="0.01"></label></form>
+ <div class="stats" id="ls2" style="margin:12px 0"></div>
+ <form class="f" id="lb2" style="margin-bottom:12px"><label>Set category of ticked entries<select id="lsc"></select></label><button class="btn" type="button" id="lap">Apply to ticked</button><button class="btn x" type="button" id="lall">Tick all shown</button><button class="btn x" type="button" id="lnone">Untick all</button><span id="ltk"></span></form>
+ <div class="sc" id="lt"></div></div>
+ <div class="card"><h2>Category rules</h2><form class="f" id="rf"><label>Description contains<input id="rc" required></label><label>Set category<select id="rs"></select></label><button class="btn">Add rule</button><button class="btn x" type="button" id="rap">Apply rules to all entries</button></form><div class="sc" id="rl" style="margin-top:12px"></div></div>
+ <div class="card"><h2>Import bank rows</h2><textarea id="imt" rows="6"></textarea><form class="f" id="imf" style="margin-top:10px"><label><span><input type="checkbox" id="imn" checked> Negative amounts are spending</span></label><button class="btn" type="button" id="imp">Preview</button><button class="btn" type="button" id="imi">Import ticked rows</button></form><div class="sc" id="imv" style="margin-top:12px"></div></div>
+</section>
+<section class="tab" id="deep">
+ <div class="card"><h2>Unusually large purchases</h2><div class="sc" id="dv1"></div></div>
+ <div class="card"><h2>Possible duplicate charges</h2><div class="sc" id="dv2"></div></div>
+ <div class="card"><h2>Bill price changes</h2><div class="sc" id="dv3"></div></div>
+</section>
+<section class="tab" id="whatif">
+ <div class="card"><h2>What if</h2><form class="f" id="wf"><label>Horizon<select id="wh"><option value="12">12 months</option><option value="24" selected>24 months</option><option value="60">5 years</option><option value="120">10 years</option></select></label><label>Income change ($/month)<input id="wi" type="number" step="0.01" value="0"></label>
+ <label>Spending category<select id="wc1"></select></label><label>Change ($/month)<input id="wa1" type="number" step="0.01" value="0"></label>
+ <label>Spending category<select id="wc2"></select></label><label>Change ($/month)<input id="wa2" type="number" step="0.01" value="0"></label>
+ <label>Spending category<select id="wc3"></select></label><label>Change ($/month)<input id="wa3" type="number" step="0.01" value="0"></label>
+ <label>One-off cost ($)<input id="wo" type="number" step="0.01" value="0"></label><label>In month<input id="wom" type="number" min="1" value="1"></label><button class="btn x" type="button" id="wr0">Reset</button></form></div>
+ <div class="card"><div class="stats" id="wst"></div></div>
+ <div class="card"><h2>Net position</h2><div style="position:relative;height:45vh"><canvas id="wcv"></canvas></div></div>
+ <div class="card"><h2>Goals</h2><div class="sc" id="wgt"></div></div>
+</section>
 </main>
 <script>
 const $=s=>document.querySelector(s),K=['daily','weekly','fortnightly','monthly','quarterly','yearly'],N={weekly:52,fortnightly:26,monthly:12};
@@ -183,7 +207,7 @@ function rYoy(){
  $('#yt').innerHTML=`<table><tr><th>Category</th><th>${A}</th><th>${Q}</th><th>Change</th><th>% change</th></tr>${cats.map(c=>row(c,a.get(c)||0,b.get(c)||0)).join('')}${row('Total',ta,tb)}</table>`;
 }
 const rCharts=()=>{rChart();rYoy();rCum();rHeat();rFixed()};
-function draw(){applyTheme();$('#abk').checked=!!(B.settings&&B.settings.autoBackup);$('#empty').style.display=(loaded||B.expenses.length||S.length)?'none':'block';rAlloc();rBudget();rIns();rDoom();rGoals();rSpend();rHealth();rBills();rChk();rSpendable();rPivot();rMonthly();rDow();rDom();rSources();rSizes();if($('#charts').classList.contains('on'))rCharts()}
+function draw(){applyTheme();$('#abk').checked=!!(B.settings&&B.settings.autoBackup);$('#empty').style.display=(loaded||B.expenses.length||S.length)?'none':'block';rAlloc();rBudget();rIns();rDoom();rGoals();rSpend();rHealth();rBills();rChk();rSpendable();rPivot();rMonthly();rDow();rDom();rSources();rSizes();rSafe();rLog();rRules();rImp();rDeep();fillWI();rWhat();if($('#charts').classList.contains('on'))rCharts()}
 // ---------- Account form ----------
 $('#at').onchange=e=>{const v=e.target.value;$('#l1').textContent=v=='credit'?'Available balance':v=='upcoming'?'Amount (paid out)':'Balance';$('#w4').style.display=v=='upcoming'?'':'none';$('#w2').style.display=v=='credit'?'':'none';$('#w3').style.display=(v=='offset'||v=='upcoming')?'none':''};
 $('#af').onsubmit=e=>{e.preventDefault();const ty=$('#at').value,a={type:ty,name:$('#an').value.trim(),bank:$('#ab').value.trim()},n=parseFloat($('#a1').value),r=parseFloat($('#a3').value)||0;
@@ -367,6 +391,101 @@ function rCum(){
  ch4=new Chart($('#cc'),{type:'line',data:{labels:Array.from({length:N},(_,i)=>new Date(y0+i*864e5).toLocaleDateString('en-AU',{day:'numeric',month:'short',timeZone:'UTC'})),datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},elements:{point:{radius:0}},scales:{y:{beginAtZero:true,ticks:{callback:v=>$f(v)}},x:{ticks:{maxTicksLimit:12,autoSkip:true}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+$f(c.parsed.y)}}}}});
 }
 $('#cy').onchange=$('#cm2').onchange=rCum;
+// ---------- Shared helpers for the newer tabs ----------
+const lToday=()=>{const d=new Date();return Date.UTC(d.getFullYear(),d.getMonth(),d.getDate())},
+D10=s=>String(s.date).slice(0,10),
+allCats=()=>[...new Set([...B.expenses.map(e=>e.source),...S.map(s=>s.category),'Uncategorized'])].filter(Boolean).sort(),
+catOpt=sel=>[...new Set([...allCats(),sel])].sort().map(c=>`<option value="${esc(c)}" ${c==sel?'selected':''}>${esc(c)}</option>`).join(''),
+fillC=(sel,blank)=>{const k=sel.value;sel.innerHTML=(blank!=null?`<option value="">${blank}</option>`:'')+allCats().map(c=>`<option value="${esc(c)}" ${c==k?'selected':''}>${esc(c)}</option>`).join('')};
+function goalPlan(){
+ const funds=netInfo(),m=B.expenses.reduce((s,e)=>s+(e.monthly||0),0);let cum=0;
+ return(B.goals||[]).map(g=>{const tg=g.amountType=='bufferMonths'?(g.bufferMonths||0)*m:(g.fixedAmount||0),before=cum;cum+=tg;const ach=!!g.achievedDate,al=Math.min(Math.max(funds-before,0),tg),sh=ach?0:Math.max(tg-al,0),mo=g.targetDate?(new Date(g.targetDate)-Date.now())/(30.44*864e5):0;
+  return{g,tg,cum,ach,sh,need:sh>0?sh/(mo>1?mo:(g.targetDate?1:12)):0}})}
+// ---------- Safe to spend ----------
+function rSafe(){
+ const lt=lToday(),td=new Date(),y=td.getFullYear(),mo=td.getMonth(),dm=td.getDate(),dim=new Date(y,mo+1,0).getDate(),key=y+'-'+String(mo+1).padStart(2,'0'),
+ inc=B.income.reduce((s,x)=>s+(x.monthly||0),0),bud=B.expenses.reduce((s,e)=>s+(e.monthly||0),0),sur=inc-bud,gs=goalPlan().reduce((s,x)=>s+x.need,0),free=sur-gs;
+ let tb=0,ta=0;calc(s=>String(s.date).startsWith(key)&&+new Date(s.date)<=lt,dm).forEach(v=>{tb+=v.b;ta+=v.a});
+ const pace=tb-ta,safe=free+pace,left=dim-dm+1,c=v=>v<0?'neg':'pos',st=(l,v,k)=>`<div class="stat">${l}<b class="${k||''}">${$f(v)}</b></div>`;
+ $('#sts').innerHTML='<h2>Safe to spend</h2><div class="stats">'+st('Safe to spend this month',safe,c(safe))+st(`Per day, ${left} days left`,safe/left,c(safe))+st('Monthly surplus (income minus budget)',sur)+st('Goal savings needed per month',-gs,gs>0?'neg':'')+st('Free surplus',free,c(free))+st('Budget pace so far',pace,c(pace))+'</div>';
+}
+// ---------- Log tools ----------
+const tick=new Set();let imp=[];
+function filt(){const q=$('#lq').value.toLowerCase(),c=$('#lc').value,f=$('#lfr').value,t=$('#lto').value,mn=$('#lmn').value,mx=$('#lmx').value;
+ return S.filter(s=>(!q||(String(s.description)+' '+s.category).toLowerCase().includes(q))&&(!c||s.category==c)&&(!f||D10(s)>=f)&&(!t||D10(s)<=t)&&(mn===''||s.amount>=+mn)&&(mx===''||s.amount<=+mx))}
+function rLog(){
+ fillC($('#lc'),'All categories');fillC($('#lsc'),'Choose category');fillC($('#rs'));
+ const r=filt();
+ $('#ls2').innerHTML=`<div class="stat">Entries<b>${r.length}</b></div><div class="stat">Total<b>${$f(r.reduce((s,x)=>s+x.amount,0))}</b></div>`;
+ $('#lt').innerHTML='<table><tr><th></th><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr>'+r.slice(0,300).map(s=>`<tr><td><input type="checkbox" data-tk="${s.id}" ${tick.has(String(s.id))?'checked':''}></td><td>${D10(s)}</td><td>${esc(s.category)}</td><td>${esc(s.description)}</td><td>${$f(s.amount)}</td></tr>`).join('')+(r.length>300?`<tr><td colspan="5">Showing 300 of ${r.length}</td></tr>`:'')+'</table>';
+ $('#ltk').textContent=tick.size?tick.size+' ticked':'';
+}
+$('#lf').oninput=$('#lf').onchange=rLog;$('#lf').onsubmit=e=>e.preventDefault();
+$('#lt').onchange=e=>{const id=e.target.dataset.tk;if(id){e.target.checked?tick.add(id):tick.delete(id);$('#ltk').textContent=tick.size?tick.size+' ticked':''}};
+$('#lall').onclick=()=>{filt().slice(0,300).forEach(s=>tick.add(String(s.id)));rLog()};
+$('#lnone').onclick=()=>{tick.clear();rLog()};
+$('#lap').onclick=()=>{const c=$('#lsc').value;if(!c||!tick.size)return;if(!confirm(`Change ${tick.size} entries to "${c}"?`))return;S.forEach(s=>{if(tick.has(String(s.id)))s.category=c});tick.clear();persist()};
+function rRules(){const R=B.rules||[];$('#rl').innerHTML='<table><tr><th>Description contains</th><th>Category</th><th>Matching entries</th><th></th></tr>'+(R.map((x,i)=>`<tr><td>${esc(x.contains)}</td><td>${esc(x.category)}</td><td>${S.filter(s=>String(s.description).toLowerCase().includes(String(x.contains).toLowerCase())).length}</td><td><button class="btn x" data-rd="${i}">Delete</button></td></tr>`).join('')||'<tr><td colspan="4">No rules yet.</td></tr>')+'</table>'}
+$('#rf').onsubmit=e=>{e.preventDefault();const c=$('#rc').value.trim(),k=$('#rs').value;if(!c||!k)return;(B.rules=B.rules||[]).push({contains:c,category:k});$('#rc').value='';persist()};
+$('#rl').onclick=e=>{const i=e.target.dataset.rd;if(i!==undefined){B.rules.splice(+i,1);persist()}};
+$('#rap').onclick=()=>{const R=B.rules||[],ch=S.filter(s=>{const r=R.find(x=>String(s.description).toLowerCase().includes(String(x.contains).toLowerCase()));return r&&r.category!=s.category});if(!ch.length)return alert('No entries would change.');if(!confirm(`${ch.length} entries will change category. Continue?`))return;ch.forEach(s=>{s.category=R.find(x=>String(s.description).toLowerCase().includes(String(x.contains).toLowerCase())).category});persist()};
+const csv=l=>{const o=[];let c='',q=false;for(const ch of l){if(ch=='"')q=!q;else if((ch==','||ch=='\t')&&!q){o.push(c);c=''}else c+=ch}o.push(c);return o},
+MN={jan:1,feb:2,mar:3,apr:4,may:5,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12},
+isD=c=>/^\d{1,4}[\/\-.]\d{1,2}[\/\-.]\d{1,4}$/.test(c)||/^\d{1,2}[ \-][A-Za-z]{3,9}\.?[ \-,]*\d{2,4}$/.test(c),
+pd=c=>{let y,m,d,x;if(x=c.match(/^(\d{1,2})[ \-]([A-Za-z]{3,9})\.?[ \-,]*(\d{2,4})$/)){d=+x[1];m=MN[x[2].slice(0,3).toLowerCase()];y=+x[3]}else{const p=c.split(/[\/\-.]/),n=p.map(Number);if(p[0].length==4)[y,m,d]=n;else[d,m,y]=n}if(y<100)y+=2000;return(y>1990&&m>=1&&m<=12&&d>=1&&d<=31)?new Date(Date.UTC(y,m-1,d)).toISOString():null},
+AMT=/^\(?-?\$?\(?-?[\d,]*\.?\d+\)?$/,num=c=>{const s=String(c||'').trim();return AMT.test(s)?(s.includes('(')||s.startsWith('-')?-1:1)*parseFloat(s.replace(/[$,()\-\s]/g,'')):NaN};
+function rImp(){$('#imv').innerHTML=imp.length?'<table><tr><th></th><th>Date</th><th>Description</th><th>Amount</th><th>Bank category</th><th>Category</th><th></th></tr>'+imp.map((x,i)=>`<tr><td><input type="checkbox" data-ik="${i}" ${x.on?'checked':''}></td><td>${x.d.slice(0,10)}</td><td>${esc(x.desc)}</td><td>${$f(x.amt)}</td><td>${esc(x.bc)}</td><td><select data-ic="${i}">${catOpt(x.cat)}</select></td><td class="${x.dup?'neg':''}">${x.dup?'Duplicate':x.tr?'Transfer':''}</td></tr>`).join('')+'</table>':''}
+$('#imp').onclick=()=>{
+ const neg=$('#imn').checked,R=B.rules||[],out=[],lines=$('#imt').value.split(/\r?\n/).filter(l=>l.trim());let hx=null;
+ if(lines.length){const h=csv(lines[0]).map(c=>c.trim().toLowerCase());if(h.includes('date')&&h.includes('amount')){const f=(...n)=>h.findIndex(c=>n.includes(c));hx={d:h.indexOf('date'),a:h.indexOf('amount'),t:f('transaction details','description','details','narrative','memo','particulars'),m:f('merchant name','merchant'),c:f('category')};lines.shift()}}
+ lines.forEach(line=>{const cells=csv(line).map(c=>c.trim().replace(/^"|"$/g,''));let dt=null,am=NaN,details='',merch='',bc='',ds=[];
+  if(hx){dt=pd(cells[hx.d]||'');am=num(cells[hx.a]);details=cells[hx.t]||'';merch=cells[hx.m]||'';bc=cells[hx.c]||'';ds=[merch||details]}
+  else cells.forEach(c=>{if(!c)return;if(dt==null&&isD(c)){dt=pd(c);return}if(AMT.test(c)){if(isNaN(am))am=num(c);return}ds.push(c)});
+  if(!dt||isNaN(am))return;const amt=neg?(am<0?-am:null):(am>0?am:null);if(amt==null)return;
+  const desc=ds.join(' ').trim(),hay=(desc+' '+details+' '+merch+' '+bc).toLowerCase(),r=R.find(x=>hay.includes(String(x.contains).toLowerCase())),tr=/transfer/i.test(bc),
+  dup=S.some(s=>D10(s)==dt.slice(0,10)&&Math.abs(s.amount-amt)<.005&&String(s.description).toLowerCase()==desc.toLowerCase());
+  out.push({d:dt,desc,amt,cat:r?r.category:'Uncategorized',bc,dup,tr,on:!dup&&!tr})});
+ imp=out;rImp();if(!out.length)alert('No usable rows found.')};
+$('#imv').onchange=e=>{const d=e.target.dataset;if(d.ik!==undefined)imp[+d.ik].on=e.target.checked;if(d.ic!==undefined)imp[+d.ic].cat=e.target.value};
+$('#imi').onclick=()=>{const rows=imp.filter(x=>x.on);if(!rows.length)return;rows.forEach((x,i)=>S.push({id:Date.now()+i,date:x.d,amount:x.amt,description:x.desc,category:x.cat}));sortS();imp=[];$('#imt').value='';persist()};
+// ---------- Deep dive ----------
+function rDeep(){
+ const lt=lToday(),all=S.filter(s=>+new Date(s.date)<=lt),med=a=>{const x=[...a].sort((p,q)=>p-q),m=x.length>>1;return x.length%2?x[m]:(x[m-1]+x[m])/2},byC=new Map();
+ all.forEach(s=>{const a=byC.get(s.category)||[];a.push(s.amount);byC.set(s.category,a)});
+ const md=new Map([...byC].map(([k,a])=>[k,med(a)])),big=all.filter(s=>byC.get(s.category).length>=5&&s.amount>=Math.max(100,3*md.get(s.category))).sort((a,b)=>b.amount/md.get(b.category)-a.amount/md.get(a.category)).slice(0,25);
+ $('#dv1').innerHTML='<table><tr><th>Date</th><th>Category</th><th>Description</th><th>Amount</th><th>Usual (median)</th><th>Times usual</th></tr>'+(big.map(s=>`<tr><td>${D10(s)}</td><td>${esc(s.category)}</td><td>${esc(s.description)}</td><td>${$f(s.amount)}</td><td>${$f(md.get(s.category))}</td><td class="neg">${(s.amount/md.get(s.category)).toFixed(1)}x</td></tr>`).join('')||'<tr><td colspan="6">Nothing unusual found.</td></tr>')+'</table>';
+ const srt=[...all].sort((a,b)=>new Date(a.date)-new Date(b.date)),dup=[];
+ for(let i=0;i<srt.length;i++)for(let j=i+1;j<srt.length&&(new Date(srt[j].date)-new Date(srt[i].date))<=3*864e5;j++){const a=srt[i],b=srt[j];if(a.amount>=5&&Math.abs(a.amount-b.amount)<.005&&(a.category==b.category||String(a.description).toLowerCase()==String(b.description).toLowerCase()))dup.push([a,b])}
+ dup.sort((p,q)=>new Date(q[1].date)-new Date(p[1].date));
+ $('#dv2').innerHTML='<table><tr><th>First</th><th>Second</th><th>Amount</th><th>Category</th><th>Descriptions</th></tr>'+(dup.slice(0,30).map(([a,b])=>`<tr><td>${D10(a)}</td><td>${D10(b)}</td><td>${$f(a.amount)}</td><td>${esc(a.category)}${a.category==b.category?'':' / '+esc(b.category)}</td><td>${esc(a.description)}${a.description==b.description?'':' / '+esc(b.description)}</td></tr>`).join('')||'<tr><td colspan="5">No likely duplicates found.</td></tr>')+'</table>';
+ const g=new Map(),em=new Map(B.expenses.map(e=>[e.source,e])),pc=[];
+ srt.forEach(s=>{const a=g.get(s.category)||[];a.push(s);g.set(s.category,a)});
+ g.forEach((a,k)=>{if(a.length<3)return;const v=a.map(x=>x.amount),m=v.reduce((p,q)=>p+q,0)/v.length,sd=Math.sqrt(v.reduce((p,q)=>p+(q-m)**2,0)/v.length);if(m<=0||sd/m>.12)return;
+  const f=a[0],l=a[a.length-1],d=l.amount-f.amount;if(Math.abs(d/f.amount)<.01)return;const e=em.get(k),ppy=e&&e.amount?(e.yearly||0)/e.amount:null;pc.push({k,f,l,d,p:d/f.amount,x:ppy?d*ppy:null})});
+ pc.sort((a,b)=>Math.abs(b.p)-Math.abs(a.p));
+ $('#dv3').innerHTML='<table><tr><th>Item</th><th>First paid</th><th>Latest</th><th>Change</th><th>% change</th><th>Effect per year</th></tr>'+(pc.map(x=>{const c=x.d>0?'neg':'pos';return`<tr><td>${esc(x.k)}</td><td>${D10(x.f)}: ${$f(x.f.amount)}</td><td>${D10(x.l)}: ${$f(x.l.amount)}</td><td class="${c}">${$f(x.d)}</td><td class="${c}">${(x.p*100).toFixed(1)}%</td><td class="${c}">${x.x==null?'-':$f(x.x)}</td></tr>`}).join('')||'<tr><td colspan="6">No bill price changes found.</td></tr>')+'</table>';
+}
+// ---------- What if ----------
+let ch8=null;
+function fillWI(){const cats=[...new Set(B.expenses.map(e=>e.category||'Uncategorized'))].sort();for(let i=1;i<=3;i++){const s=$('#wc'+i),k=s.value;s.innerHTML='<option value="">(none)</option>'+cats.map(c=>`<option value="${esc(c)}" ${c==k?'selected':''}>${esc(c)}</option>`).join('')}}
+function rWhat(){
+ if(ch8){ch8.destroy();ch8=null}
+ const H=+$('#wh').value,inc=B.income.reduce((s,x)=>s+(x.monthly||0),0),bud=B.expenses.reduce((s,e)=>s+(e.monthly||0),0),cm=new Map();
+ B.expenses.forEach(e=>{const c=e.category||'Uncategorized';cm.set(c,(cm.get(c)||0)+(e.monthly||0))});
+ let d=+$('#wi').value||0;for(let i=1;i<=3;i++){const c=$('#wc'+i).value;if(c)d-=Math.max(+$('#wa'+i).value||0,-(cm.get(c)||0))}
+ const s0=inc-bud,s1=s0+d,amt=+$('#wo').value||0,mo=Math.max(1,+$('#wom').value||1),n0=netInfo(),
+ lab=m=>{const x=new Date();x.setMonth(x.getMonth()+m);return x.toLocaleDateString('en-AU',{month:'short',year:'numeric'})},
+ base=Array.from({length:H+1},(_,m)=>n0+s0*m),scn=Array.from({length:H+1},(_,m)=>n0+s1*m-(m>=mo?amt:0)),
+ st=(l,v,k)=>`<div class="stat">${l}<b class="${k||''}">${$f(v)}</b></div>`,df=scn[H]-base[H];
+ $('#wst').innerHTML=st('Monthly surplus now',s0)+st('Monthly surplus with changes',s1,s1>=s0?'pos':'neg')+st(`Net position in ${H} months`,base[H])+st('With changes',scn[H],df>=0?'pos':'neg')+st('Difference',df,df>=0?'pos':'neg');
+ if(typeof Chart!='undefined')ch8=new Chart($('#wcv'),{type:'line',data:{labels:base.map((_,m)=>lab(m)),datasets:[{label:'Current plan',data:base,borderColor:'#8a99a6',backgroundColor:'#8a99a6',borderDash:[6,4],borderWidth:2,tension:0},{label:'With changes',data:scn,borderColor:'#2fa37f',backgroundColor:'#2fa37f',borderWidth:3,tension:0}]},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},elements:{point:{radius:0}},scales:{y:{ticks:{callback:v=>$f(v)}},x:{ticks:{maxTicksLimit:12,autoSkip:true}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+$f(c.parsed.y)}}}}});
+ const at=(a,c)=>a.findIndex(v=>v>=c),tx=m=>m<0?'Beyond horizon':m==0?'Funded now':lab(m);
+ $('#wgt').innerHTML='<table><tr><th>Goal</th><th>Cumulative target</th><th>Current plan</th><th>With changes</th><th>Difference</th></tr>'+(goalPlan().map(p=>{if(p.ach)return`<tr><td>${esc(p.g.name)}</td><td>${$f(p.cum)}</td><td>Achieved</td><td>Achieved</td><td>-</td></tr>`;
+  const b=at(base,p.cum),w=at(scn,p.cum);let r='-',c='';if(b>=0&&w>=0){const x=w-b;r=x<0?`${-x} months sooner`:x>0?`${x} months later`:'No change';c=x<0?'pos':x>0?'neg':''}else if(b<0&&w>=0){r='Now within horizon';c='pos'}else if(b>=0&&w<0){r='Pushed beyond horizon';c='neg'}
+  return`<tr><td>${esc(p.g.name)}</td><td>${$f(p.cum)}</td><td>${tx(b)}</td><td>${tx(w)}</td><td class="${c}">${r}</td></tr>`}).join('')||'<tr><td colspan="5">No goals.</td></tr>')+'</table>';
+}
+$('#wf').oninput=$('#wf').onchange=rWhat;$('#wf').onsubmit=e=>e.preventDefault();
+$('#wr0').onclick=()=>{['wi','wa1','wa2','wa3','wo'].forEach(i=>$('#'+i).value=0);$('#wom').value=1;['wc1','wc2','wc3'].forEach(i=>$('#'+i).value='');rWhat()};
 // ---------- Events ----------
 document.addEventListener('change',e=>{const t=e.target,d=t.dataset;
  if(d.a!==undefined){const x=B.expenses[d.a];t.value?x.bucket=t.value:delete x.bucket;return persist()}
