@@ -416,9 +416,16 @@ function filt(){const q=$('#lq').value.toLowerCase(),c=$('#lc').value,f=$('#lfr'
 function rLog(){
  fillC($('#lc'),'All categories');fillC($('#lsc'),'Choose category');fillC($('#rs'));
  const r=filt();
- $('#ls2').innerHTML=`<div class="stat">Entries<b>${r.length}</b></div><div class="stat">Total<b>${$f(r.reduce((s,x)=>s+x.amount,0))}</b></div>`;
+ $('#ls2').innerHTML=logStats(r);
  $('#lt').innerHTML='<table><tr><th></th><th>Date</th><th>Category</th><th>Description</th><th>Amount</th></tr>'+r.slice(0,300).map(s=>`<tr><td><input type="checkbox" data-tk="${s.id}" ${tick.has(String(s.id))?'checked':''}></td><td>${D10(s)}</td><td>${esc(s.category)}</td><td>${esc(s.description)}</td><td>${$f(s.amount)}</td></tr>`).join('')+(r.length>300?`<tr><td colspan="5">Showing 300 of ${r.length}</td></tr>`:'')+'</table>';
  $('#ltk').textContent=tick.size?tick.size+' ticked':'';
+}
+function logStats(r){
+ const lt=lToday(),tot=r.reduce((s,x)=>s+x.amount,0),st=(l,v,sub)=>`<div class="stat">${l}<b>${v}</b>${sub?`<small>${sub}</small>`:''}</div>`,d=r.filter(s=>+new Date(s.date)<=lt).sort((a,b)=>new Date(a.date)-new Date(b.date)||a.id-b.id),h=st('Entries',r.length,r.length>d.length?`${r.length-d.length} future-dated`:'')+st('Total',$f(tot));
+ if(!d.length)return h;
+ const f=d[0],l=d[d.length-1],n=d.length,sum=d.reduce((s,x)=>s+x.amount,0),[y1,m1]=D10(f).split('-').map(Number),[y2,m2]=D10(l).split('-').map(Number),mo=(y2-y1)*12+m2-m1+1,pm=sum/mo,
+ big=d.reduce((a,x)=>x.amount>a.amount?x:a),sm=d.reduce((a,x)=>x.amount<a.amount?x:a),tx=s=>`${esc(s.description)} · ${$f(s.amount)}`;
+ return h+st('First transaction',D10(f),tx(f))+st('Last transaction',D10(l),tx(l))+st('Average per transaction',$f(sum/n),`${n} transactions`)+st('Average per month',$f(pm),`${mo} month${mo>1?'s':''}, ${D10(f).slice(0,7)} to ${D10(l).slice(0,7)}`)+st('Yearly at this pace',$f(pm*12))+st('Largest transaction',$f(big.amount),`${D10(big)} · ${esc(big.description)}`)+st('Smallest transaction',$f(sm.amount),`${D10(sm)} · ${esc(sm.description)}`);
 }
 $('#lf').oninput=$('#lf').onchange=rLog;$('#lf').onsubmit=e=>e.preventDefault();
 $('#lt').onchange=e=>{const id=e.target.dataset.tk;if(id){e.target.checked?tick.add(id):tick.delete(id);$('#ltk').textContent=tick.size?tick.size+' ticked':''}};
