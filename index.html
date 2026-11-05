@@ -1,35 +1,9 @@
 <!DOCTYPE html>
 <html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Budget Hub</title>
-<style>
-:root{--d:#23403B;--g:#69C99F;--m:#6D9E89;--t:#637A6C;--r:#d9534f}
-*{box-sizing:border-box}body{margin:0;font:15px/1.5 system-ui,sans-serif;background:#f4f4f4;color:#333}
-header{background:var(--d);color:#f0f0f0;padding:12px 20px;position:sticky;top:0;z-index:9;display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
-h1{margin:0;font-size:1.3em}button,select,input{font:inherit}
-.btn{background:var(--g);color:var(--d);border:0;padding:7px 12px;border-radius:5px;cursor:pointer}.btn:hover{background:var(--m)}
-.btn.x{background:#eee;color:#555;padding:2px 8px;font-size:.85em}
-nav{background:#fff;border-bottom:1px solid #ccc;display:flex;gap:6px;padding:0 15px;flex-wrap:wrap}
-nav button{background:none;border:0;padding:10px 14px;cursor:pointer;color:#555;border-bottom:3px solid transparent}
-nav button.on{color:var(--d);font-weight:700;border-color:var(--d)}
-main{max-width:1300px;margin:0 auto;padding:16px}.tab{display:none}.tab.on{display:block}
-.card{background:#fff;border-radius:10px;box-shadow:0 2px 5px #0001;padding:14px;margin-bottom:16px}
-h2{margin:0 0 10px;color:var(--d);font-size:1.15em}
-.stats{display:flex;gap:12px;flex-wrap:wrap}.stat{flex:1;min-width:130px;background:#f9f9f9;border:1px solid #ddd;border-radius:8px;padding:10px;text-align:center}
-.stat b{display:block;font-size:1.25em;color:var(--d)}.pos{color:#28a745!important}.neg{color:var(--r)!important}
-.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(310px,1fr));gap:14px;align-items:start}
-.bk{border-top:5px solid var(--c);background:#fff;border-radius:10px;box-shadow:0 2px 5px #0001;padding:12px}.bk.un{background:#fffaf0}
-.bk h3{margin:0;display:flex;justify-content:space-between;gap:8px;font-size:1.05em}.sub{color:#777;font-size:.85em;margin-bottom:6px}
-.row{display:flex;justify-content:space-between;align-items:center;gap:6px;padding:4px 0;border-top:1px solid #eee;font-size:.92em}
-.row select{max-width:140px;font-size:.85em}
-.chips{display:flex;gap:8px;flex-wrap:wrap}.chip{border-left:5px solid var(--c);background:#fff;padding:6px 10px;border-radius:6px;box-shadow:0 1px 3px #0002}
-table{width:100%;border-collapse:collapse}th,td{padding:6px 8px;border-bottom:1px solid #eee;text-align:left;white-space:nowrap}th{background:var(--t);color:#fff}
-td input,td select{width:100%;min-width:70px;padding:4px}.sc{overflow-x:auto;max-height:520px}
-form.f{display:flex;gap:8px;flex-wrap:wrap;align-items:end}form.f label{display:flex;flex-direction:column;font-size:.8em;color:#555}
-#dirty{background:var(--r);padding:2px 8px;border-radius:10px;font-size:.8em;display:none}
-.btn.x.on{background:var(--g);color:var(--d);font-weight:700}
-.g2{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}td.pos,td.neg{font-weight:700}td.pos{background:#f0fff4}td.neg{background:#fff8f8}
-</style><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7"></script></head><body>
+<link rel="stylesheet" href="style-base.css">
+<link rel="stylesheet" id="theme" href="theme-paper.css"><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7"></script></head><body>
 <header><h1>Budget Hub <span id="dirty">unsaved changes</span></h1>
-<div><button class="btn" id="lb">Load file(s)</button> <button class="btn" id="sb">Save</button> <button class="btn x" id="sl">Export legacy files</button> <label style="font-size:.8em"><input type="checkbox" id="abk"> Auto backup</label></div></header>
+<div><button class="btn" id="lb">Load file(s)</button> <button class="btn" id="sb">Save</button> <button class="btn x" id="sl">Export legacy files</button> <select id="thm"><option value="paper">Paper</option><option value="midnight">Midnight</option><option value="ledger">Ledger</option></select> <label style="font-size:.8em"><input type="checkbox" id="abk"> Auto backup</label></div></header>
 <nav><button class="on" data-tab="alloc">Allocation</button><button data-tab="budget">Budget</button><button data-tab="insights">Insights</button><button data-tab="doom">Doomsday</button><button data-tab="goals">Goals</button><button data-tab="bills">Bills</button><button data-tab="spend">Spending</button><button data-tab="chk">Budget check</button><button data-tab="charts">Charts</button></nav>
 <main>
 <div class="card" id="msg" style="display:none;border-left:5px solid var(--g)"></div>
@@ -47,7 +21,11 @@ form.f{display:flex;gap:8px;flex-wrap:wrap;align-items:end}form.f label{display:
  <div class="card"><h2>Income</h2><div class="sc"><table id="inc"></table></div><form class="f" id="nf"><label>Source<input id="ns" required></label><label>Amount<input id="na" type="number" step="0.01" required></label><label>Frequency<select id="nq" class="fq"></select></label><button class="btn">Add income</button></form></div>
  <div class="card"><h2>Expenses</h2><div class="sc"><table id="exp"></table></div><form class="f" id="ef"><label>Description<input id="es" required></label><label>Category<input id="ec" required></label><label>Amount<input id="ea" type="number" step="0.01" required></label><label>Frequency<select id="eq" class="fq"></select></label><button class="btn">Add expense</button></form></div>
 </section>
-<section class="tab" id="insights"><div class="card"><h2>Income summary</h2><div class="stats" id="i1"></div></div><div class="card"><h2>Expense summary</h2><div class="stats" id="i2"></div></div><div class="card"><h2>Net position</h2><div class="stats" id="i3"></div></div><div class="card"><h2>Expense analysis</h2><div class="sc" id="i4"></div></div><div class="card"><h2>Expense analysis by category</h2><div class="sc" id="i5"></div></div><div class="card"><h2>Annual spending by category <select id="pv1"><option value="cat">Budget category</option><option value="item">Budget item</option></select> <select id="pv2"><option value="cal">Calendar year</option><option value="fy">Financial year (Jul–Jun)</option></select></h2><small id="pvn"></small><div class="sc" id="pv"></div></div><div class="card"><h2>Spendable amount by expense</h2><label><input type="checkbox" id="ded"> Deduct goal targets first</label><p id="i6h"></p><div class="sc" id="i6"></div></div><div class="card"><h2>Spendable amount by category</h2><div class="sc" id="i7"></div></div></section>
+<section class="tab" id="insights"><div class="card"><h2>Income summary</h2><div class="stats" id="i1"></div></div><div class="card"><h2>Expense summary</h2><div class="stats" id="i2"></div></div><div class="card"><h2>Net position</h2><div class="stats" id="i3"></div></div><div class="card"><h2>Expense analysis</h2><div class="sc" id="i4"></div></div><div class="card"><h2>Expense analysis by category</h2><div class="sc" id="i5"></div></div><div class="card"><h2>Annual spending by category <select id="pv1"><option value="cat">Budget category</option><option value="item">Budget item</option></select> <select id="pv2"><option value="cal">Calendar year</option><option value="fy">Financial year (Jul–Jun)</option></select></h2><small id="pvn"></small><div class="sc" id="pv"></div></div><div class="card"><h2>Spending by day of week <select id="dwp"></select> <select id="dwr"><option value="cat">Budget category</option><option value="item">Budget item</option></select> <select id="dwm"><option value="tot">Total</option><option value="avg">Average per day</option></select></h2><div class="sc" id="dw"></div></div>
+<div class="card"><h2>Spending by day of month <select id="ddp"></select> <select id="ddr"><option value="cat">Budget category</option><option value="item">Budget item</option></select> <select id="ddm"><option value="tot">Total</option><option value="avg">Average per day</option></select></h2><div class="sc" id="dd"></div></div>
+<div class="card"><h2>Top spending sources <select id="tsp"></select> <select id="tsw"><option value="1">First word</option><option value="2">First two words</option></select></h2><div class="sc" id="ts"></div></div>
+<div class="card"><h2>Purchase sizes <select id="psp"></select></h2><div class="sc" id="ps"></div></div>
+<div class="card"><h2>Spendable amount by expense</h2><label><input type="checkbox" id="ded"> Deduct goal targets first</label><p id="i6h"></p><div class="sc" id="i6"></div></div><div class="card"><h2>Spendable amount by category</h2><div class="sc" id="i7"></div></div></section>
 <section class="tab" id="doom"><div class="card"><h2>Doomsday: runway with no new income</h2><div id="dm"></div></div></section>
 <section class="tab" id="goals"><div class="card"><h2>Goals</h2><small>Goals are funded in priority order from your net position (assets minus liabilities), as on the Doomsday tab. Each goal's target is added to those above it.</small><div class="stats" id="gs" style="margin:12px 0"></div><div class="sc"><table id="gt"></table></div></div>
 <div class="card"><h2>New goal</h2><form class="f" id="gf"><label>Name<input id="gn" required></label><label>Type<select id="gy"><option value="fixed">Fixed amount</option><option value="bufferMonths">Months of expenses</option></select></label><label><span id="gl">Amount</span><input id="ga" type="number" step="0.01" required></label><label>Target date<input id="gd" type="date"></label><button class="btn">Add goal</button></form></div></section>
@@ -61,7 +39,10 @@ form.f{display:flex;gap:8px;flex-wrap:wrap;align-items:end}form.f label{display:
  <div class="card"><h2>Expense log</h2><div class="sc"><table id="lg"></table></div></div>
 </section>
 <section class="tab" id="charts"><div class="card"><h2>Budget vs actual chart <select id="cp"></select></h2><div id="cm"></div><div style="position:relative;height:50vh"><canvas id="cv"></canvas></div></div>
-<div class="card"><h2>Year on year <select id="ya"></select> vs <select id="yb"></select></h2><div style="position:relative;height:50vh"><canvas id="yc"></canvas></div><div class="sc" id="yt" style="margin-top:12px"></div></div></section>
+<div class="card"><h2>Year on year <select id="ya"></select> vs <select id="yb"></select></h2><div style="position:relative;height:50vh"><canvas id="yc"></canvas></div><div class="sc" id="yt" style="margin-top:12px"></div></div>
+<div class="card"><h2>Cumulative spend <select id="cy"></select> <select id="cm2"><option value="cat">By budget category</option><option value="item">By budget item</option><option value="tot">Total vs budget pace</option></select></h2><div style="position:relative;height:55vh"><canvas id="cc"></canvas></div></div>
+<div class="card"><h2>Daily spending heatmap <select id="hy"></select></h2><div class="sc" id="hm"></div></div>
+<div class="card"><h2>Recurring bills vs everything else, by month</h2><div style="position:relative;height:45vh"><canvas id="ffc"></canvas></div></div></section>
 </main>
 <script>
 const $=s=>document.querySelector(s),K=['daily','weekly','fortnightly','monthly','quarterly','yearly'],N={weekly:52,fortnightly:26,monthly:12};
@@ -201,8 +182,8 @@ function rYoy(){
  const row=(c,x,y)=>`<tr><td>${esc(c)}</td><td>${$f(x)}</td><td>${$f(y)}</td><td class="${y>x?'neg':'pos'}">${$f(y-x)}</td><td class="${y>x?'neg':'pos'}">${x?((y-x)/x*100).toFixed(1)+'%':'new'}</td></tr>`,ta=[...a.values()].reduce((s,v)=>s+v,0),tb=[...b.values()].reduce((s,v)=>s+v,0);
  $('#yt').innerHTML=`<table><tr><th>Category</th><th>${A}</th><th>${Q}</th><th>Change</th><th>% change</th></tr>${cats.map(c=>row(c,a.get(c)||0,b.get(c)||0)).join('')}${row('Total',ta,tb)}</table>`;
 }
-const rCharts=()=>{rChart();rYoy()};
-function draw(){$('#abk').checked=!!(B.settings&&B.settings.autoBackup);$('#empty').style.display=(loaded||B.expenses.length||S.length)?'none':'block';rAlloc();rBudget();rIns();rDoom();rGoals();rSpend();rHealth();rBills();rChk();rSpendable();rPivot();rMonthly();if($('#charts').classList.contains('on'))rCharts()}
+const rCharts=()=>{rChart();rYoy();rCum();rHeat();rFixed()};
+function draw(){applyTheme();$('#abk').checked=!!(B.settings&&B.settings.autoBackup);$('#empty').style.display=(loaded||B.expenses.length||S.length)?'none':'block';rAlloc();rBudget();rIns();rDoom();rGoals();rSpend();rHealth();rBills();rChk();rSpendable();rPivot();rMonthly();rDow();rDom();rSources();rSizes();if($('#charts').classList.contains('on'))rCharts()}
 // ---------- Account form ----------
 $('#at').onchange=e=>{const v=e.target.value;$('#l1').textContent=v=='credit'?'Available balance':v=='upcoming'?'Amount (paid out)':'Balance';$('#w4').style.display=v=='upcoming'?'':'none';$('#w2').style.display=v=='credit'?'':'none';$('#w3').style.display=(v=='offset'||v=='upcoming')?'none':''};
 $('#af').onsubmit=e=>{e.preventDefault();const ty=$('#at').value,a={type:ty,name:$('#an').value.trim(),bank:$('#ab').value.trim()},n=parseFloat($('#a1').value),r=parseFloat($('#a3').value)||0;
@@ -298,7 +279,7 @@ const pack=()=>JSON.stringify({...B,hubVersion:1,spending:S},null,2);
 function ingest(d){
  if(Array.isArray(d)){S=d.map(e=>({...e,id:e.id||Date.now()+Math.random()}));return}
  if(!d||typeof d!='object'||!['accounts','income','expenses','spending'].some(k=>Array.isArray(d[k])))throw new Error('Not a budget or spending file');
- const{spending,...rest}=d;B=rest;norm();
+ const th=B.settings&&B.settings.theme,{spending,...rest}=d;B=rest;norm();if(th&&!(B.settings&&B.settings.theme))(B.settings=B.settings||{}).theme=th;
  if(Array.isArray(spending))S=spending.map(e=>({...e,id:e.id||Date.now()+Math.random()}))}
 const sum=()=>`${B.accounts.length} accounts, ${B.expenses.length} expenses (${B.expenses.filter(e=>e.bucket).length} assigned to buckets, ${B.expenses.filter(e=>e.bill===false).length} excluded from bills), ${B.buckets.length} buckets, ${(B.goals||[]).length} goals, ${S.length} spending entries`;
 function note(m){$('#msg').textContent=m;$('#msg').style.display='block'}
@@ -309,6 +290,83 @@ function pickMany(){const i=document.createElement('input');i.type='file';i.acce
   for(const x of items){try{ingest(x.d);done.push(x.n+(x.k==1?' (spending)':x.k==2?' (combined)':' (budget)'))}catch(e){alert('Could not read '+x.n+': '+e.message)}}
   if(done.length){loaded=true;norm();sortS();persist();clean();note('Loaded '+done.join(', ')+'. Now holding '+sum()+'.'+(S.length?'':' No spending data is loaded. If you expected some, load your spending file too.'))}
   i.remove()};i.click()}
+// ---------- Theme (stored in the data file only) ----------
+const THEMES=['paper','midnight','ledger'];
+function applyTheme(){const t=B.settings&&THEMES.includes(B.settings.theme)?B.settings.theme:'paper',h='theme-'+t+'.css',l=$('#theme');if(l.getAttribute('href')!=h)l.setAttribute('href',h);$('#thm').value=t}
+$('#thm').onchange=e=>{(B.settings=B.settings||{}).theme=e.target.value;persist()};
+// ---------- Day pivots and period helpers ----------
+const DAYS=['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],wd=t=>(new Date(t).getUTCDay()+6)%7,dom=t=>new Date(t).getUTCDate()-1,
+$0=n=>new Intl.NumberFormat('en-AU',{style:'currency',currency:'AUD',maximumFractionDigits:0}).format(n),
+catMap=()=>new Map(B.expenses.map(e=>[e.source,e.category||'Uncategorized'])),
+fillP=sel=>{const keep=sel.value||'all';sel.innerHTML=['all',...periods()].map(p=>`<option value="${p}" ${p==keep?'selected':''}>${p=='all'?'All data':p}</option>`).join('')};
+function prange(p){
+ const now=Date.now(),today=Math.floor(now/864e5)*864e5,[y,m]=p.split('-').map(Number),all=S.filter(s=>new Date(s.date)<=now),
+ fa=all.length?Math.floor(Math.min(...all.map(s=>+new Date(s.date)))/864e5)*864e5:today,
+ s0=p=='all'?fa:Math.max(fa,Date.UTC(y,(m||1)-1,1)),e0=Math.min(today,p=='all'?today:m?Date.UTC(y,m,0):Date.UTC(y,11,31));
+ return{rs:all.filter(s=>p=='all'||String(s.date).startsWith(p)),s0,e0,days:Math.max(1,(e0-s0)/864e5+1)}}
+function dpivot(pf,cols,key){
+ fillP($('#'+pf+'p'));const p=$('#'+pf+'p').value,roll=$('#'+pf+'r').value=='cat',avg=$('#'+pf+'m').value=='avg',cat=catMap(),cells=new Map(),R=prange(p),n=cols.length,occ=Array(n).fill(0),F=n>7?$0:$f,pd=n>7?' style="padding:.3rem .4rem"':'';
+ R.rs.forEach(s=>{const k=roll?(cat.get(s.category)||s.category||'Uncategorized'):(s.category||'Uncategorized'),r=cells.get(k)||Array(n).fill(0);r[key(s.date)]+=s.amount;cells.set(k,r)});
+ for(let x=R.s0;x<=R.e0;x+=864e5)occ[key(x)]++;
+ const rows=[...cells].map(([k,r])=>{const v=r.map((x,i)=>avg?x/Math.max(1,occ[i]):x);return{k,v,t:v.reduce((a,b)=>a+b,0)}}).sort((a,b)=>b.t-a.t),mx=Math.max(1,...rows.flatMap(x=>x.v)),ct=i=>rows.reduce((s,x)=>s+x.v[i],0);
+ $('#'+pf).innerHTML='<table><tr><th>'+(roll?'Category':'Budget item')+'</th>'+cols.map((d,i)=>`<th${pd}>${d}<br><small>${occ[i]}x</small></th>`).join('')+`<th>${avg?'Typical period':'Total'}</th></tr>`+
+ rows.map(x=>{const m=Math.max(...x.v);return`<tr><td>${esc(x.k)}</td>${x.v.map(v=>`<td style="background:rgba(105,201,159,${(v/mx*.55).toFixed(2)});${v&&v==m?'font-weight:700;':''}${n>7?'padding:.3rem .4rem':''}"}>${v?F(v):'-'}</td>`).join('')}<td><b>${$f(x.t)}</b></td></tr>`}).join('')+
+ `<tr><th>Total</th>${cols.map((d,i)=>`<th${pd}>${F(ct(i))}</th>`).join('')}<th>${$f(rows.reduce((s,x)=>s+x.t,0))}</th></tr></table>`;
+}
+const rDow=()=>dpivot('dw',DAYS,wd),rDom=()=>dpivot('dd',Array.from({length:31},(_,i)=>i+1),dom);
+$('#dwp').onchange=$('#dwr').onchange=$('#dwm').onchange=rDow;$('#ddp').onchange=$('#ddr').onchange=$('#ddm').onchange=rDom;
+// ---------- Top sources, purchase sizes ----------
+function rSources(){
+ fillP($('#tsp'));const R=prange($('#tsp').value),w=+$('#tsw').value,g=new Map();
+ R.rs.forEach(s=>{const k=String(s.description||'').toLowerCase().replace(/[^a-z\s]/g,' ').trim().split(/\s+/).slice(0,w).join(' ')||'(blank)',o=g.get(k)||{k,t:0,n:0};o.t+=s.amount;o.n++;g.set(k,o)});
+ const rows=[...g.values()].sort((a,b)=>b.t-a.t),tot=rows.reduce((s,x)=>s+x.t,0)||1,mx=rows[0]?rows[0].t:1;
+ $('#ts').innerHTML='<table><tr><th>#</th><th>Source</th><th>Total</th><th>Share</th><th>Purchases</th><th>Average</th><th style="width:25%"></th></tr>'+rows.slice(0,30).map((x,i)=>`<tr><td>${i+1}</td><td style="text-transform:capitalize">${esc(x.k)}</td><td>${$f(x.t)}</td><td>${(x.t/tot*100).toFixed(1)}%</td><td>${x.n}</td><td>${$f(x.t/x.n)}</td><td><div style="height:8px;border-radius:4px;background:var(--g);width:${x.t/mx*100}%"></div></td></tr>`).join('')+'</table>';
+}
+function rSizes(){
+ fillP($('#psp'));const R=prange($('#psp').value),tot=R.rs.reduce((s,x)=>s+x.amount,0)||1,n=R.rs.length||1,
+ rows=[[0,10,'Under $10'],[10,50,'$10 to $50'],[50,100,'$50 to $100'],[100,300,'$100 to $300'],[300,500,'$300 to $500'],[500,1000,'$500 to $1,000'],[1000,1e12,'$1,000 and over']].map(([a,b,l])=>{const m=R.rs.filter(s=>s.amount>=a&&s.amount<b);return{l,n:m.length,t:m.reduce((s,x)=>s+x.amount,0)}});
+ $('#ps').innerHTML='<table><tr><th>Purchase size</th><th>Purchases</th><th>% of purchases</th><th>Total</th><th>% of spend</th><th style="width:30%"></th></tr>'+rows.map(x=>`<tr><td>${x.l}</td><td>${x.n}</td><td>${(x.n/n*100).toFixed(1)}%</td><td>${$f(x.t)}</td><td>${(x.t/tot*100).toFixed(1)}%</td><td><div style="height:8px;border-radius:4px;background:var(--g);width:${x.t/tot*100}%"></div></td></tr>`).join('')+'</table>';
+}
+$('#tsp').onchange=$('#tsw').onchange=rSources;$('#psp').onchange=rSizes;
+let ch6=null;
+// ---------- Calendar heatmap ----------
+function rHeat(){
+ const now=Date.now(),today=Math.floor(now/864e5)*864e5,yrs=[...new Set(S.filter(s=>new Date(s.date)<=now).map(s=>String(s.date).slice(0,4)))].sort().reverse(),keep=$('#hy').value;
+ $('#hy').innerHTML=yrs.map(y=>`<option ${y==keep?'selected':''}>${y}</option>`).join('')||'<option value="">No data</option>';
+ const y=+$('#hy').value;if(!y){$('#hm').innerHTML='';return}
+ const day=new Map();S.filter(s=>String(s.date).startsWith(y)&&new Date(s.date)<=now).forEach(s=>{const k=String(s.date).slice(0,10);day.set(k,(day.get(k)||0)+s.amount)});
+ const vals=[...day.values()].sort((a,b)=>a-b),cap=vals.length?(vals[Math.floor(vals.length*.95)]||vals[vals.length-1]):1,j1=Date.UTC(y,0,1),off=wd(j1),n=((y%4==0&&y%100!=0)||y%400==0)?366:365,cells=[];
+ for(let i=0;i<off;i++)cells.push('<i></i>');
+ for(let i=0;i<n;i++){const t=j1+i*864e5,k=new Date(t).toISOString().slice(0,10),v=day.get(k)||0;cells.push(`<i title="${k}: ${$f(v)}" style="border-radius:3px;background:${t>today?'transparent':v?`color-mix(in srgb,var(--g) ${Math.round(15+Math.min(1,v/cap)*85)}%,var(--soft))`:'var(--soft)'}"></i>`)}
+ const mon=Array.from({length:12},(_,m)=>`<span style="grid-column:${Math.floor((off+Math.round((Date.UTC(y,m,1)-j1)/864e5))/7)+1};grid-row:1">${new Date(Date.UTC(y,m,1)).toLocaleDateString('en-AU',{month:'short',timeZone:'UTC'})}</span>`).join('');
+ $('#hm').innerHTML=`<div style="display:flex;gap:6px"><div style="display:grid;grid-template-rows:repeat(7,15px);gap:3px;margin-top:20px;font-size:10px;line-height:15px;color:var(--muted)">${DAYS.map(d=>`<span>${d}</span>`).join('')}</div><div><div style="display:grid;grid-template-columns:repeat(54,15px);gap:3px;font-size:10px;color:var(--muted);height:17px">${mon}</div><div style="display:grid;grid-template-rows:repeat(7,15px);grid-auto-flow:column;grid-auto-columns:15px;gap:3px">${cells.join('')}</div></div></div>`;
+}
+$('#hy').onchange=rHeat;
+// ---------- Fixed vs flexible ----------
+function rFixed(){
+ if(ch6){ch6.destroy();ch6=null}if(typeof Chart=='undefined')return;
+ const now=Date.now(),bill=new Map(B.expenses.map(e=>[e.source,e.bill!==false])),m=new Map();
+ S.filter(s=>new Date(s.date)<=now).forEach(s=>{const k=String(s.date).slice(0,7),o=m.get(k)||[0,0];o[bill.get(s.category)?0:1]+=s.amount;m.set(k,o)});
+ const ks=[...m.keys()].sort();
+ ch6=new Chart($('#ffc'),{type:'bar',data:{labels:ks,datasets:[{label:'Recurring bills',data:ks.map(k=>m.get(k)[0]),backgroundColor:'rgba(35,64,59,.75)'},{label:'Everything else',data:ks.map(k=>m.get(k)[1]),backgroundColor:'rgba(105,201,159,.85)'}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{stacked:true},y:{stacked:true,beginAtZero:true,ticks:{callback:v=>$f(v)}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+$f(c.parsed.y)}}}}});
+}
+// ---------- Cumulative spend chart ----------
+let ch4=null;
+function rCum(){
+ const now=Date.now(),yrs=[...new Set(S.filter(s=>new Date(s.date)<=now).map(s=>String(s.date).slice(0,4)))].sort().reverse(),keep=$('#cy').value;
+ $('#cy').innerHTML=yrs.map(y=>`<option ${y==keep?'selected':''}>${y}</option>`).join('')||'<option value="">No data</option>';
+ if(ch4){ch4.destroy();ch4=null}
+ const y=+$('#cy').value;if(!y||typeof Chart=='undefined')return;
+ const mode=$('#cm2').value,cat=new Map(B.expenses.map(e=>[e.source,e.category||'Uncategorized'])),y0=Date.UTC(y,0,1),today=Math.floor(now/864e5)*864e5,y1=Math.min(Date.UTC(y,11,31),today),N=Math.max(1,Math.round((y1-y0)/864e5)+1),byK=new Map();
+ S.filter(s=>String(s.date).slice(0,4)==y&&new Date(s.date)<=now).forEach(s=>{const k=mode=='tot'?'Actual':mode=='item'?(s.category||'Uncategorized'):(cat.get(s.category)||s.category||'Uncategorized'),a=byK.get(k)||Array(N).fill(0);a[Math.min(N-1,Math.max(0,Math.round((+new Date(s.date)-y0)/864e5)))]+=s.amount;byK.set(k,a)});
+ const cum=a=>{let t=0;return a.map(v=>t+=v)},tot=a=>a.reduce((s,v)=>s+v,0),pal=['#1f77b4','#e6550d','#2ca02c','#9467bd','#d62728','#17becf','#bcbd22','#e377c2'];
+ let ent=[...byK].sort((a,b)=>tot(b[1])-tot(a[1]));
+ if(mode!='tot'&&ent.length>8){const o=Array(N).fill(0);ent.slice(8).forEach(e=>e[1].forEach((v,i)=>o[i]+=v));ent=[...ent.slice(0,8),['All other',o]]}
+ const ds=ent.map(([k,a],i)=>({label:k,data:cum(a),borderColor:k=='All other'?'#8a99a6':pal[i%8],backgroundColor:k=='All other'?'#8a99a6':pal[i%8],borderWidth:2,tension:0,stepped:true}));
+ if(mode=='tot'){const bt=B.expenses.reduce((s,e)=>s+(e.yearly||0),0),dy=(y%4==0&&y%100!=0)||y%400==0?366:365;ds.push({label:'Budget pace',data:Array.from({length:N},(_,i)=>bt*(i+1)/dy),borderColor:'#8a99a6',borderDash:[6,4],borderWidth:2,tension:0})}
+ ch4=new Chart($('#cc'),{type:'line',data:{labels:Array.from({length:N},(_,i)=>new Date(y0+i*864e5).toLocaleDateString('en-AU',{day:'numeric',month:'short',timeZone:'UTC'})),datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},elements:{point:{radius:0}},scales:{y:{beginAtZero:true,ticks:{callback:v=>$f(v)}},x:{ticks:{maxTicksLimit:12,autoSkip:true}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+$f(c.parsed.y)}}}}});
+}
+$('#cy').onchange=$('#cm2').onchange=rCum;
 // ---------- Events ----------
 document.addEventListener('change',e=>{const t=e.target,d=t.dataset;
  if(d.a!==undefined){const x=B.expenses[d.a];t.value?x.bucket=t.value:delete x.bucket;return persist()}
