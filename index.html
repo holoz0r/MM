@@ -32,6 +32,7 @@ form.f{display:flex;gap:8px;flex-wrap:wrap;align-items:end}form.f label{display:
 <div><button class="btn" id="lb">Load file(s)</button> <button class="btn" id="sb">Save</button> <button class="btn x" id="sl">Export legacy files</button> <label style="font-size:.8em"><input type="checkbox" id="abk"> Auto backup</label></div></header>
 <nav><button class="on" data-tab="alloc">Allocation</button><button data-tab="budget">Budget</button><button data-tab="insights">Insights</button><button data-tab="doom">Doomsday</button><button data-tab="goals">Goals</button><button data-tab="bills">Bills</button><button data-tab="spend">Spending</button><button data-tab="chk">Budget check</button><button data-tab="charts">Charts</button></nav>
 <main>
+<div class="card" id="msg" style="display:none;border-left:5px solid var(--g)"></div>
 <div class="card" id="empty" style="display:none"><b>No data loaded.</b> Nothing is stored in your browser, so use <b>Load file(s)</b> to open your saved JSON: the combined file, or your old budget_data.json and spending_data.json together.</div>
 <section class="tab on" id="alloc">
  <div class="card"><div class="stats"><label class="stat">Pay cycle<select id="cyc"><option>weekly</option><option>fortnightly</option><option selected>monthly</option></select></label>
@@ -75,12 +76,12 @@ const fq=s=>K.map(k=>`<option ${k==s?'selected':''}>${k}</option>`).join('');
 function norm(){B.accounts=B.accounts||[];B.income=B.income||[];B.expenses=B.expenses||[];B.buckets=B.buckets||[]}
 function persist(){$('#dirty').style.display='inline';draw()}
 function clean(){$('#dirty').style.display='none'}
-function dl(name,txt,keep){const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.download=name;a.click();URL.revokeObjectURL(a.href);if(!keep)clean()}
+function dl(name,txt,keep){const a=document.createElement('a'),u=URL.createObjectURL(new Blob([txt],{type:'application/json'}));a.href=u;a.download=name;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(u)},15000);if(!keep)clean()}
 
 const sortS=()=>S.sort((a,b)=>new Date(b.date)-new Date(a.date));
 $('#lb').onclick=pickMany;
 
-$('#sb').onclick=()=>{if(!loaded&&!B.expenses.length&&!S.length&&!confirm('Nothing is loaded. Save an empty file?'))return;sv('budget_hub_data',pack())};
+$('#sb').onclick=()=>{if(!loaded&&!B.expenses.length&&!S.length&&!confirm('Nothing is loaded. Save an empty file?'))return;sv('budget_hub_data',pack());note('Saved budget_hub_data.json containing '+sum()+'.')};
 $('#sl').onclick=()=>{dl('budget_data.json',JSON.stringify(B),1);setTimeout(()=>dl('spending_data.json',JSON.stringify(S,null,2),1),600)};
 
 // ---------- Allocation ----------
@@ -299,8 +300,15 @@ function ingest(d){
  if(!d||typeof d!='object'||!['accounts','income','expenses','spending'].some(k=>Array.isArray(d[k])))throw new Error('Not a budget or spending file');
  const{spending,...rest}=d;B=rest;norm();
  if(Array.isArray(spending))S=spending.map(e=>({...e,id:e.id||Date.now()+Math.random()}))}
-function pickMany(){const i=document.createElement('input');i.type='file';i.accept='.json';i.multiple=true;
- i.onchange=async()=>{let ok=0;for(const f of i.files){try{ingest(JSON.parse(await f.text()));ok++}catch(e){alert('Could not read '+f.name+': '+e.message)}}if(ok){loaded=true;norm();sortS();persist();clean()}};i.click()}
+const sum=()=>`${B.accounts.length} accounts, ${B.expenses.length} expenses (${B.expenses.filter(e=>e.bucket).length} assigned to buckets, ${B.expenses.filter(e=>e.bill===false).length} excluded from bills), ${B.buckets.length} buckets, ${(B.goals||[]).length} goals, ${S.length} spending entries`;
+function note(m){$('#msg').textContent=m;$('#msg').style.display='block'}
+function pickMany(){const i=document.createElement('input');i.type='file';i.accept='.json';i.multiple=true;i.style.display='none';document.body.appendChild(i);
+ i.onchange=async()=>{const items=[];
+  for(const f of i.files){try{const d=JSON.parse(await f.text());items.push({n:f.name,d,k:Array.isArray(d)?1:(d&&Array.isArray(d.spending))?2:0})}catch(e){alert('Could not read '+f.name+': '+e.message)}}
+  items.sort((a,b)=>a.k-b.k);const done=[];
+  for(const x of items){try{ingest(x.d);done.push(x.n+(x.k==1?' (spending)':x.k==2?' (combined)':' (budget)'))}catch(e){alert('Could not read '+x.n+': '+e.message)}}
+  if(done.length){loaded=true;norm();sortS();persist();clean();note('Loaded '+done.join(', ')+'. Now holding '+sum()+'.'+(S.length?'':' No spending data is loaded. If you expected some, load your spending file too.'))}
+  i.remove()};i.click()}
 // ---------- Events ----------
 document.addEventListener('change',e=>{const t=e.target,d=t.dataset;
  if(d.a!==undefined){const x=B.expenses[d.a];t.value?x.bucket=t.value:delete x.bucket;return persist()}
