@@ -4,7 +4,12 @@
 <link rel="stylesheet" id="theme" href="theme-paper.css"><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.7"></script></head><body>
 <header><h1>Budget Hub <span id="dirty">unsaved changes</span></h1>
 <div><button class="btn" id="lb">Load file(s)</button> <button class="btn" id="sb">Save</button> <button class="btn x" id="sl">Export legacy files</button> <select id="thm"><option value="paper">Paper</option><option value="midnight">Midnight</option><option value="ledger">Ledger</option></select> <label style="font-size:.8em"><input type="checkbox" id="abk"> Auto backup</label></div></header>
-<nav><button class="on" data-tab="alloc">Allocation</button><button data-tab="budget">Budget</button><button data-tab="insights">Insights</button><button data-tab="doom">Doomsday</button><button data-tab="goals">Goals</button><button data-tab="bills">Bills</button><button data-tab="spend">Spending</button><button data-tab="logtools">Log tools</button><button data-tab="chk">Budget check</button><button data-tab="charts">Charts</button><button data-tab="deep">Deep dive</button><button data-tab="whatif">What if</button></nav>
+<nav id="grp"><button class="on" data-g="plan">Plan</button><button data-g="track">Track</button><button data-g="analyse">Analyse</button></nav>
+    <nav id="sub">
+        <span data-grp="plan"><button class="on" data-tab="alloc">Allocation</button><button data-tab="budget">Budget</button><button data-tab="goals">Goals</button><button data-tab="doom">Doomsday</button><button data-tab="whatif">What if</button></span>
+        <span data-grp="track" hidden><button data-tab="spend">Spending</button><button data-tab="bills">Bills</button><button data-tab="logtools">Log tools</button></span>
+        <span data-grp="analyse" hidden><button data-tab="insights">Insights</button><button data-tab="evm">EVM</button><button data-tab="chk">Budget check</button><button data-tab="charts">Charts</button><button data-tab="deep">Deep dive</button></span>
+    </nav>
 <main>
 <div class="card" id="msg" style="display:none;border-left:5px solid var(--g)"></div>
 <div class="card" id="empty" style="display:none"><b>No data loaded.</b> Nothing is stored in your browser, so use <b>Load file(s)</b> to open your saved JSON: the combined file, or your old budget_data.json and spending_data.json together.</div>
@@ -32,8 +37,9 @@
 <section class="tab" id="bills"><div class="card"><h2>Bills coming up <select id="bw"><option value="30">Next 30 days</option><option value="60" selected>Next 60 days</option><option value="90">Next 90 days</option></select></h2><small>Due dates are inferred from your last payment in the spending log plus the bill's frequency. Set a date to override it; once you log a later payment, the inferred date takes over again.</small><h3>Cover check (balances before upcoming transfers)</h3><div class="sc" id="bcv"></div></div><div class="card"><h2>All bills</h2><div class="sc" id="blt"></div></div></section>
 <section class="tab" id="chk"><div class="card"><h2>Budget reality check</h2><label>Months of history <input id="ckm" type="number" min="1" value="12" style="width:80px;padding:4px"></label> <label><input type="checkbox" id="cka"> All history</label><br><small id="cknote"></small><div class="sc" id="ck"></div></div></section>
 <section class="tab" id="spend">
- <div class="card" id="sts"></div>
  <div class="card"><h2>Log expense</h2><form class="f" id="sf"><label>Date<input id="sd" type="date" required></label><label>Amount<input id="sa" type="number" step="0.01" required></label><label>Description<input id="sn" required></label><label>Budget item<select id="sc" required></select></label><button class="btn">Add expense</button></form></div>
+ <div class="card" id="sts"></div>
+ 
  <div class="card"><h2>Budget vs actual</h2><div class="stats" id="sm"></div><div style="text-align:center;margin:12px 0"><button class="btn x" data-nav="-1">&lt;&lt; Prev</button> <b id="pd"></b> <button class="btn x" data-nav="1">Next &gt;&gt;</button><div style="margin-top:8px"><button class="btn x" data-v="daily">Daily</button> <button class="btn x" data-v="weekly">Weekly</button> <button class="btn x" data-v="monthly">Monthly</button> <button class="btn x" data-v="yearly">Yearly</button></div></div><div class="sc"><table id="va"></table></div></div>
  <div class="card"><h2>Overspend by month</h2><div class="sc"><table id="os"></table></div></div>
  <div class="card"><h2>Monthly spending by category <select id="my"></select> <select id="mr"><option value="cat">Budget category</option><option value="item">Budget item</option></select></h2><small>Shading shows relative size. Future-dated entries are excluded.</small><div class="sc" id="mt"></div></div>
@@ -42,6 +48,7 @@
 <section class="tab" id="charts"><div class="card"><h2>Budget vs actual chart <select id="cp"></select></h2><div id="cm"></div><div style="position:relative;height:50vh"><canvas id="cv"></canvas></div></div>
 <div class="card"><h2>Year on year <select id="ya"></select> vs <select id="yb"></select></h2><div style="position:relative;height:50vh"><canvas id="yc"></canvas></div><div class="sc" id="yt" style="margin-top:12px"></div></div>
 <div class="card"><h2>Cumulative spend <select id="cy"></select> <select id="cm2"><option value="cat">By budget category</option><option value="item">By budget item</option><option value="tot">Total vs budget pace</option></select></h2><div style="position:relative;height:55vh"><canvas id="cc"></canvas></div></div>
+<div class="card"><h2>Cumulative spend, year on year <select id="cf"></select></h2><div style="position:relative;height:55vh"><canvas id="yoyc"></canvas></div><div class="sc" id="cyt" style="margin-top:12px"></div></div>
 <div class="card"><h2>Daily spending heatmap <select id="hy"></select></h2><div class="sc" id="hm"></div></div>
 <div class="card"><h2>Recurring bills vs everything else, by month</h2><div style="position:relative;height:45vh"><canvas id="ffc"></canvas></div></div></section>
 <section class="tab" id="logtools">
@@ -66,6 +73,13 @@
  <div class="card"><div class="stats" id="wst"></div></div>
  <div class="card"><h2>Net position</h2><div style="position:relative;height:45vh"><canvas id="wcv"></canvas></div></div>
  <div class="card"><h2>Goals</h2><div class="sc" id="wgt"></div></div>
+</section>
+<section class="tab" id="evm">
+ <div class="card"><h2>Spending vs budget over time</h2><form class="f" id="evf"><label>Year type<select id="evt"><option value="cal">Calendar year</option><option value="fy">Financial year (Jul to Jun)</option></select></label><label>Year<select id="evy"></select></label><label>Scope<select id="evs"></select></label><label>Group by<select id="evg"><option value="cat">Budget category</option><option value="item">Budget item</option></select></label></form></div>
+ <div class="card"><div class="stats" id="evk"></div></div>
+ <div class="card"><h2>Cumulative spend vs plan</h2><div style="position:relative;height:55vh"><canvas id="evc"></canvas></div></div>
+ <div class="card"><h2>Projection by category</h2><div class="sc" id="evp"></div></div>
+ <div class="card"><h2>Month by month</h2><div class="sc" id="evm2"></div></div>
 </section>
 </main>
 <script>
@@ -179,7 +193,7 @@ function rSpend(){
  document.querySelectorAll('[data-v]').forEach(b=>b.classList.toggle('on',b.dataset.v==view));
  $('#sm').innerHTML=`<div class="stat">Budgeted<b>${$f(tb)}</b></div><div class="stat">Actual<b>${$f(ta)}</b></div><div class="stat">Variance<b class="${tb>=ta?'pos':'neg'}">${$f(tb-ta)}</b><small>${pt(tb,ta)}</small></div>`;
  const mx=Math.max(1,...[...r.values()].map(v=>Math.max(v.a,v.b)));
- $('#va').innerHTML='<tr><th>Budget item</th><th>Budgeted</th><th>Actual</th><th>Variance</th><th>Over / under</th></tr>'+[...r].filter(([k,v])=>v.a||v.b).sort().map(([k,v])=>{const d=v.b-v.a,c=d>=0?'pos':'neg';return`<tr><td>${esc(k)}</td><td>${$f(v.b)}</td><td>${$f(v.a)}</td><td class="${c}">${$f(d)}</td><td class="${c}">${pt(v.b,v.a)}</td></tr>`}).join('');
+ $('#va').innerHTML='<tr><th>Budget item</th><th>Budgeted</th><th>Actual</th><th>Variance</th><th>Over / under</th><th style="min-width:200px">Progress</th></tr>'+[...r].filter(([k,v])=>v.a||v.b).sort().map(([k,v])=>{const d=v.b-v.a,c=d>=0?'pos':'neg',pr=v.b>0?v.a/v.b:(v.a>0?2:0),bc=B.expenses.some(x=>x.source==k&&x.bill!==false)?'var(--muted)':pr>1?'var(--neg)':pr>=.8?'#e0a100':'var(--pos)',el=Math.min(1,Math.max(0,(Date.now()-p.s)/(p.e-p.s)));return`<tr><td>${esc(k)}</td><td>${$f(v.b)}</td><td>${$f(v.a)}</td><td class="${c}">${$f(d)}</td><td class="${c}">${pt(v.b,v.a)}</td><td><div style="position:relative;height:10px;border-radius:5px;background:var(--track)"><div style="height:10px;border-radius:5px;width:${Math.min(100,pr*100)}%;background:${bc}"></div><div style="position:absolute;left:${el*100}%;top:-3px;bottom:-3px;width:2px;background:var(--text);opacity:.45"></div></div></td></tr>`}).join('');
  let o='';[...new Set(S.map(s=>String(s.date).slice(0,7)))].sort().reverse().forEach(k=>{const[yy,mm]=k.split('-').map(Number);[...calc(s=>String(s.date).slice(0,7)==k,new Date(yy,mm,0).getDate())].sort().forEach(([c,v])=>{if(v.a>v.b)o+=`<tr><td>${k}</td><td>${esc(c)}</td><td>${$f(v.b)}</td><td>${$f(v.a)}</td><td class="neg">${$f(v.a-v.b)}</td></tr>`})});
  $('#os').innerHTML='<tr><th>Month</th><th>Budget item</th><th>Budgeted</th><th>Spent</th><th>Overspend</th></tr>'+(o||'<tr><td colspan="5">No overspending found.</td></tr>');
  $('#lg').innerHTML='<tr><th>Date</th><th>Item</th><th>Description</th><th>Amount</th><th></th></tr>'+S.map(s=>s.id==ed?`<tr><td><input type="date" id="e1" value="${String(s.date).slice(0,10)}"></td><td><select id="e2">${catOpts(s.category)}</select></td><td><input id="e3" value="${esc(s.description)}"></td><td><input id="e4" type="number" step="0.01" value="${s.amount}"></td><td><button class="btn x" data-sv="${s.id}">Save</button> <button class="btn x" data-cn="1">Cancel</button></td></tr>`:`<tr><td>${String(s.date).slice(0,10)}</td><td>${esc(s.category)}</td><td>${esc(s.description)}</td><td>${$f(s.amount)}</td><td><button class="btn x" data-ed="${s.id}">Edit</button> <button class="btn x" data-dx="spd:${s.id}">Delete</button></td></tr>`).join('');
@@ -206,8 +220,8 @@ function rYoy(){
  const row=(c,x,y)=>`<tr><td>${esc(c)}</td><td>${$f(x)}</td><td>${$f(y)}</td><td class="${y>x?'neg':'pos'}">${$f(y-x)}</td><td class="${y>x?'neg':'pos'}">${x?((y-x)/x*100).toFixed(1)+'%':'new'}</td></tr>`,ta=[...a.values()].reduce((s,v)=>s+v,0),tb=[...b.values()].reduce((s,v)=>s+v,0);
  $('#yt').innerHTML=`<table><tr><th>Category</th><th>${A}</th><th>${Q}</th><th>Change</th><th>% change</th></tr>${cats.map(c=>row(c,a.get(c)||0,b.get(c)||0)).join('')}${row('Total',ta,tb)}</table>`;
 }
-const rCharts=()=>{rChart();rYoy();rCum();rHeat();rFixed()};
-function draw(){applyTheme();$('#abk').checked=!!(B.settings&&B.settings.autoBackup);$('#empty').style.display=(loaded||B.expenses.length||S.length)?'none':'block';rAlloc();rBudget();rIns();rDoom();rGoals();rSpend();rHealth();rBills();rChk();rSpendable();rPivot();rMonthly();rDow();rDom();rSources();rSizes();rSafe();rLog();rRules();rImp();rDeep();fillWI();rWhat();if($('#charts').classList.contains('on'))rCharts()}
+const rCharts=()=>{rChart();rYoy();rCum();rCumY();rHeat();rFixed()};
+function draw(){applyTheme();$('#abk').checked=!!(B.settings&&B.settings.autoBackup);$('#empty').style.display=(loaded||B.expenses.length||S.length)?'none':'block';rAlloc();rBudget();rIns();rDoom();rGoals();rSpend();rHealth();rBills();rChk();rSpendable();rPivot();rMonthly();rDow();rDom();rSources();rSizes();rSafe();rLog();rRules();rImp();rDeep();fillWI();rWhat();if($('#evm').classList.contains('on'))rEvm();if($('#charts').classList.contains('on'))rCharts()}
 // ---------- Account form ----------
 $('#at').onchange=e=>{const v=e.target.value;$('#l1').textContent=v=='credit'?'Available balance':v=='upcoming'?'Amount (paid out)':'Balance';$('#w4').style.display=v=='upcoming'?'':'none';$('#w2').style.display=v=='credit'?'':'none';$('#w3').style.display=(v=='offset'||v=='upcoming')?'none':''};
 $('#af').onsubmit=e=>{e.preventDefault();const ty=$('#at').value,a={type:ty,name:$('#an').value.trim(),bank:$('#ab').value.trim()},n=parseFloat($('#a1').value),r=parseFloat($('#a3').value)||0;
@@ -493,6 +507,74 @@ function rWhat(){
 }
 $('#wf').oninput=$('#wf').onchange=rWhat;$('#wf').onsubmit=e=>e.preventDefault();
 $('#wr0').onclick=()=>{['wi','wa1','wa2','wa3','wo'].forEach(i=>$('#'+i).value=0);$('#wom').value=1;['wc1','wc2','wc3'].forEach(i=>$('#'+i).value='');rWhat()};
+// ---------- EVM: spending vs budget ----------
+let ch9=null;
+function rEvm(){
+ const fy=$('#evt').value=='fy',lt=lToday(),per=t=>{const d=new Date(t),y=d.getUTCFullYear();return fy&&d.getUTCMonth()>=6?y+1:y},
+ ps=[...new Set([...S.filter(s=>+new Date(s.date)<=lt).map(s=>per(s.date)),per(lt)])].sort((a,b)=>b-a),keep=$('#evy').value||String(per(lt));
+ $('#evy').innerHTML=ps.map(y=>`<option value="${y}" ${String(y)==keep?'selected':''}>${fy?`FY${y} (Jul ${y-1} to Jun ${y})`:y}</option>`).join('');
+ const cat=catMap(),cats=[...new Set(B.expenses.map(e=>e.category||'Uncategorized'))].sort(),ks=$('#evs').value;
+ $('#evs').innerHTML='<option value="">All spending</option>'+cats.map(c=>`<option value="${esc(c)}" ${c==ks?'selected':''}>${esc(c)}</option>`).join('');
+ if(ch9){ch9.destroy();ch9=null}$('#evk').innerHTML='';$('#evm2').innerHTML='';$('#evp').innerHTML='';
+ const sc=$('#evs').value,Y=+$('#evy').value;if(!Y)return;
+ const DAY=864e5,p0=fy?Date.UTC(Y-1,6,1):Date.UTC(Y,0,1),pe=fy?Date.UTC(Y,5,30):Date.UTC(Y,11,31),all=S.filter(s=>+new Date(s.date)<=lt),
+ fa=all.length?Math.floor(Math.min(...all.map(s=>+new Date(s.date)))/DAY)*DAY:lt,es=Math.max(p0,fa),now=Math.min(lt,pe);
+ if(es>now)return;
+ const T=Math.round((pe-es)/DAY)+1,e=Math.round((now-es)/DAY)+1,pdays=Math.round((pe-p0)/DAY)+1,done=now>=pe,
+ bac=B.expenses.filter(x=>!sc||(x.category||'Uncategorized')==sc).reduce((s,x)=>s+(x.yearly||0),0)*T/pdays,
+ day=s=>Math.floor(+new Date(s.date)/DAY)*DAY,ev=all.filter(s=>day(s)>=es&&day(s)<=now&&(!sc||cat.get(s.category)==sc)),
+ a=Array(e).fill(0);ev.forEach(s=>a[Math.round((day(s)-es)/DAY)]+=s.amount);let c=0;
+ const cum=a.map(v=>c+=v),AC=cum[e-1],pv=i=>bac*(i+1)/T,PV=pv(e-1),eac1=done||!(AC>0&&PV>0)?AC:bac*AC/PV,eac2=done?AC:AC+(bac-PV),
+ fd=ms=>new Date(ms).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric',timeZone:'UTC'}),
+ st=(l,v,sub,k)=>`<div class="stat">${l}<b class="${k||''}">${v}</b>${sub?`<small>${sub}</small>`:''}</div>`,cl=v=>v<0?'neg':'pos',
+ gone=done?'-':AC>=bac?'Already passed':(AC>0&&eac1>bac)?fd(now+(bac-AC)/(AC/e)*DAY):'Within budget';
+ $('#evk').innerHTML=st('Budget for the period',$f(bac),es>p0?`from ${fd(es)}`:`${fd(p0)} to ${fd(pe)}`)+st('Planned to date',$f(PV))+st('Spent to date',$f(AC))+st('Variance to date',$f(PV-AC),pt(PV,AC),cl(PV-AC))+
+  st('Budget index',AC>0?(PV/AC).toFixed(2):'-','plan divided by spend',AC>0?(PV>=AC?'pos':'neg'):'')+st('Projected total at current rate',$f(eac1),`${$f(Math.abs(bac-eac1))} ${eac1>bac?'over':'under'} budget`,cl(bac-eac1))+
+  st('Projected total if the rest follows plan',$f(eac2),`${$f(Math.abs(bac-eac2))} ${eac2>bac?'over':'under'} budget`,cl(bac-eac2))+st('Budget left',$f(bac-AC),'',cl(bac-AC))+st('Expected spend for the rest',$f(eac1-AC))+st('Budget runs out',gone,'',gone=='Within budget'||gone=='-'?'pos':'neg');
+ if(typeof Chart!='undefined'){const lab=Array.from({length:T},(_,i)=>new Date(es+i*DAY).toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'2-digit',timeZone:'UTC'})),
+  proj=f=>Array.from({length:T},(_,i)=>i<e-1?null:f(i)),k=PV>0?AC/PV:1,
+  ds=[{label:'Planned (budget)',data:Array.from({length:T},(_,i)=>pv(i)),borderColor:'#8a99a6',backgroundColor:'#8a99a6',borderWidth:2,tension:0},{label:'Actual',data:cum,borderColor:'#2fa37f',backgroundColor:'#2fa37f',borderWidth:3,tension:0,stepped:true}];
+  if(!done)ds.push({label:'Projection at current rate',data:proj(i=>AC+k*(pv(i)-PV)),borderColor:'#e6550d',backgroundColor:'#e6550d',borderDash:[6,4],borderWidth:2,tension:0},{label:'Projection if the rest follows plan',data:proj(i=>AC+(pv(i)-PV)),borderColor:'#1f77b4',backgroundColor:'#1f77b4',borderDash:[6,4],borderWidth:2,tension:0});
+  ch9=new Chart($('#evc'),{type:'line',data:{labels:lab,datasets:ds},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},elements:{point:{radius:0}},scales:{y:{beginAtZero:true,ticks:{callback:v=>$f(v)}},x:{ticks:{maxTicksLimit:12,autoSkip:true}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+$f(c.parsed.y)}}}}})}
+ const item=$('#evg').value=='item',G=new Map(),gk=s=>item?(s.category||'Uncategorized'):(cat.get(s.category)||s.category||'Uncategorized');
+ B.expenses.forEach(x=>{const k=item?x.source:(x.category||'Uncategorized'),o=G.get(k)||{b:0,a:0};o.b+=(x.yearly||0)*T/pdays;G.set(k,o)});
+ all.filter(s=>day(s)>=es&&day(s)<=now).forEach(s=>{const k=gk(s),o=G.get(k)||{b:0,a:0};o.a+=s.amount;G.set(k,o)});
+ const pr=[...G].map(([k,o])=>({k,b:o.b,a:o.a,p1:done?o.a:o.a*T/e,p2:done?o.a:o.a+o.b-o.b*e/T})).filter(x=>x.b||x.a).sort((x,y)=>(y.p1-y.b)-(x.p1-x.b)),sm=f=>pr.reduce((s,x)=>s+f(x),0),
+ ov=(p,b)=>`<td class="${cl(b-p)}">${$f(Math.abs(p-b))} ${p>b?'over':'under'}</td>`;
+ $('#evp').innerHTML='<table><tr><th>'+(item?'Budget item':'Category')+'</th><th>Budget</th><th>Spent to date</th><th>Projected at current rate</th><th>Over / under budget</th><th>Projected if the rest follows plan</th><th>Over / under budget</th></tr>'+
+ pr.map(x=>`<tr><td>${esc(x.k)}</td><td>${$f(x.b)}</td><td>${$f(x.a)}</td><td>${$f(x.p1)}</td>${ov(x.p1,x.b)}<td>${$f(x.p2)}</td>${ov(x.p2,x.b)}</tr>`).join('')+
+ `<tr><th>Total</th><th>${$f(sm(x=>x.b))}</th><th>${$f(sm(x=>x.a))}</th><th>${$f(sm(x=>x.p1))}</th><th>${$f(Math.abs(sm(x=>x.p1-x.b)))} ${sm(x=>x.p1-x.b)>0?'over':'under'}</th><th>${$f(sm(x=>x.p2))}</th><th>${$f(Math.abs(sm(x=>x.p2-x.b)))} ${sm(x=>x.p2-x.b)>0?'over':'under'}</th></tr></table>`;
+ const mb=new Map();ev.forEach(s=>{const k=D10(s).slice(0,7);mb.set(k,(mb.get(k)||0)+s.amount)});
+ let rows='',cv=0,s0=new Date(es);
+ for(let d=Date.UTC(s0.getUTCFullYear(),s0.getUTCMonth(),1);d<=pe;){const dd=new Date(d),ms=Math.max(d,es),me=Math.min(Date.UTC(dd.getUTCFullYear(),dd.getUTCMonth()+1,0),pe),dm=Math.round((me-ms)/DAY)+1,pl=bac*dm/T,key=dd.toISOString().slice(0,7),
+  fut=ms>now,part=!fut&&me>now,act=mb.get(key)||0,planTD=part?bac*(Math.round((now-ms)/DAY)+1)/T:pl,proj=PV>0?pl*AC/PV:pl,vr=fut?null:planTD-act;if(vr!=null)cv+=vr;
+  rows+=`<tr style="${fut?'font-style:italic;color:var(--muted)':''}"><td>${dd.toLocaleDateString('en-AU',{month:'short',year:'numeric',timeZone:'UTC'})}${fut?' (projected)':part?' (to date)':''}</td><td>${$f(pl)}</td><td>${$f(fut?proj:act)}</td><td class="${vr==null?'':cl(vr)}">${vr==null?'-':$f(vr)}</td><td class="${vr==null?'':cl(cv)}">${vr==null?'-':$f(cv)}</td></tr>`;
+  d=Date.UTC(dd.getUTCFullYear(),dd.getUTCMonth()+1,1)}
+ $('#evm2').innerHTML='<table><tr><th>Month</th><th>Planned</th><th>Actual or projected</th><th>Variance</th><th>Cumulative variance</th></tr>'+rows+`<tr><th>Total</th><th>${$f(bac)}</th><th>${$f(eac1)}</th><th>${$f(bac-eac1)}</th><th></th></tr></table>`;
+}
+$('#evt').addEventListener('change',()=>{$('#evy').innerHTML=''});$('#evf').onchange=rEvm;$('#evf').onsubmit=e=>e.preventDefault();
+// ---------- Year-on-year cumulative ----------
+let ch5=null;
+function rCumY(){
+ const now=Date.now(),sel=$('#cf'),keep=sel.value||'all',cat=catMap(),ct=s=>cat.get(s.category)||s.category||'Uncategorized',all=S.filter(s=>new Date(s.date)<=now);
+ sel.innerHTML=`<option value="all" ${keep=='all'?'selected':''}>All spending</option>`+[...new Set(all.map(ct))].sort().map(c=>`<option value="${esc(c)}" ${c==keep?'selected':''}>${esc(c)}</option>`).join('');
+ if(ch5){ch5.destroy();ch5=null}$('#cyt').innerHTML='';
+ if(!all.length)return;
+ const rs=all.filter(s=>sel.value=='all'||ct(s)==sel.value),yrs=[...new Set(all.map(s=>String(s.date).slice(0,4)))].sort(),today=Math.floor(now/864e5)*864e5,ty=new Date(today).getUTCFullYear(),fa=Math.floor(Math.min(...all.map(s=>+new Date(s.date)))/864e5)*864e5,fy=new Date(fa).getUTCFullYear(),
+ idx=t=>{const d=new Date(t),m=d.getUTCMonth();return Math.round((Date.UTC(2001,m,m==1&&d.getUTCDate()==29?28:d.getUTCDate())-Date.UTC(2001,0,1))/864e5)},ti=idx(today),fi=idx(fa),
+ lab=Array.from({length:365},(_,i)=>new Date(Date.UTC(2001,0,1+i)).toLocaleDateString('en-AU',{day:'numeric',month:'short',timeZone:'UTC'})),pal=['#8a99a6','#e6550d','#1f77b4','#2ca02c','#9467bd','#d62728'],
+ sets=yrs.map((y,k)=>{const a=Array(365).fill(0);rs.filter(s=>String(s.date).startsWith(y)).forEach(s=>a[idx(s.date)]+=s.amount);let c=0;const cum=a.map(v=>c+=v),from=+y==fy?fi:0,to=+y==ty?ti:364,pts=[];for(let i=from;i<=to;i++)pts.push({x:lab[i],y:cum[i]});
+  const mo=new Set(all.filter(s=>String(s.date).startsWith(y)).map(s=>String(s.date).slice(0,7))).size;
+  return{y,cum,mo,ds:{label:y+(mo<12?` (${mo} mo of data)`:''),data:pts,borderColor:pal[k%6],backgroundColor:pal[k%6],borderWidth:+y==ty?3:2,tension:0,stepped:true}}});
+ if(typeof Chart!='undefined')ch5=new Chart($('#yoyc'),{type:'line',data:{labels:lab,datasets:sets.map(s=>s.ds)},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},elements:{point:{radius:0}},scales:{y:{beginAtZero:true,ticks:{callback:v=>$f(v)}},x:{ticks:{maxTicksLimit:12,autoSkip:true}}},plugins:{tooltip:{callbacks:{label:c=>c.dataset.label+': '+$f(c.parsed.y)}}}}});
+ $('#cyt').innerHTML=`<table><tr><th>Year</th><th>Spent to ${lab[ti]}</th><th>Full year</th><th>Change vs previous year</th><th>% change</th></tr>`+sets.map((s,i)=>{const v=s.cum[ti],pv=i&&sets[i-1].mo>=12?sets[i-1].cum[ti]:null,d=pv==null?null:v-pv,c=d==null?'':d>0?'neg':'pos';return`<tr><td>${s.ds.label}</td><td>${$f(v)}</td><td>${+s.y==ty?'-':$f(s.cum[364])}</td><td class="${c}">${d==null?'-':$f(d)}</td><td class="${c}">${d==null?'-':pv?(d/pv*100).toFixed(1)+'%':'new'}</td></tr>`}).join('')+'</table>';
+}
+$('#cf').onchange=rCumY;
+// ---------- Grouped navigation ----------
+const gl={};
+document.addEventListener('click',e=>{const d=e.target.dataset;
+ if(d.tab){const sp=e.target.closest('#sub span');if(sp)gl[sp.dataset.grp]=e.target}
+ if(d.g){document.querySelectorAll('#grp button').forEach(b=>b.classList.toggle('on',b.dataset.g==d.g));document.querySelectorAll('#sub span').forEach(s=>s.hidden=s.dataset.grp!=d.g);(gl[d.g]||document.querySelector(`#sub span[data-grp="${d.g}"] button`)).click()}});
 // ---------- Events ----------
 document.addEventListener('change',e=>{const t=e.target,d=t.dataset;
  if(d.a!==undefined){const x=B.expenses[d.a];t.value?x.bucket=t.value:delete x.bucket;return persist()}
@@ -511,7 +593,7 @@ document.addEventListener('click',e=>{const d=e.target.dataset;
  if(d.ed){ed=d.ed;rSpend()}
  if(d.cn){ed=null;rSpend()}
  if(d.sv){const s=S.find(x=>x.id==d.sv),a=parseFloat($('#e4').value);if(isNaN(a)||!$('#e1').value)return alert('Enter a valid date and amount.');s.date=new Date($('#e1').value).toISOString();s.category=$('#e2').value;s.description=$('#e3').value;s.amount=a;ed=null;sortS();persist()}
- if(d.tab){document.querySelectorAll('nav button,.tab').forEach(x=>x.classList.remove('on'));e.target.classList.add('on');$('#'+d.tab).classList.add('on');if(d.tab=='charts')rCharts()}
+ if(d.tab){document.querySelectorAll('#sub button,.tab').forEach(x=>x.classList.remove('on'));e.target.classList.add('on');$('#'+d.tab).classList.add('on');if(d.tab=='charts')rCharts();if(d.tab=='evm')rEvm()}
  if(d.ren){const n=(prompt('Rename bucket',d.ren)||'').trim();if(n&&n!=d.ren&&!B.buckets.some(b=>b.name==n)){B.buckets.find(b=>b.name==d.ren).name=n;B.expenses.forEach(x=>{if(x.bucket==d.ren)x.bucket=n});persist()}}
  if(d.delb&&confirm('Delete this bucket? Its expenses become unallocated.')){B.buckets=B.buckets.filter(b=>b.name!=d.delb);B.expenses.forEach(x=>{if(x.bucket==d.delb)delete x.bucket});persist()}
  if(d.dx&&confirm('Delete this entry?')){const[t,i]=d.dx.split(':');if(t=='spd')S=S.filter(s=>s.id!=i);else({exp:B.expenses,inc:B.income,acc:B.accounts,goal:B.goals||[]}[t]).splice(+i,1);persist()}});
